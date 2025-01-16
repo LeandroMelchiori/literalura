@@ -24,6 +24,7 @@ Literalura es una aplicación desarrollada en Java utilizando Spring Boot para g
 
 ## Estructura del proyecto
 
+```markdown
 src/
 ├── main/
 │   ├── java/
