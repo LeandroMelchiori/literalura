@@ -123,8 +123,15 @@ spring.jpa.hibernate.ddl-auto=update
    Ingrese el año: 1800
    Autores vivos hasta 1800:
    - [Nombre: Jane Austen, Año de nacimiento: 1775, Año de muerte: 1817]
+   ```
 
+## Licencia
+### Este proyecto se distribuye bajo la licencia MIT. Puedes consultar el archivo LICENSE para más detalles.
 
-
-
-
+## Contribuciones
+### ¡Las contribuciones son bienvenidas! Si deseas colaborar:
+1. Haz un fork del repositorio.
+2. Crea una nueva rama (git checkout -b feature/nueva-funcionalidad).
+3. Haz tus cambios y realiza un commit (git commit -m 'Agrego nueva funcionalidad').
+4. Sube tus cambios (git push origin feature/nueva-funcionalidad).
+5. Abre un Pull Request.
