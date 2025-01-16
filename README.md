@@ -50,3 +50,7 @@ src/ ├── main/ │ ├── java/ │ │ ├── com.alura.literalura/
 5. Buscar autores vivos hasta un año específico
 0. Salir
 
+# Buscar libro por título:
+Ingrese el título del libro: Pride and Prejudice
+Resultado: Libro encontrado: [Título: Pride and Prejudice, Autor: Jane Austen, Idioma: Inglés]
+
