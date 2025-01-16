@@ -25,3 +25,4 @@ Literalura es una aplicación desarrollada en Java utilizando Spring Boot para g
 ## Estructura del proyecto
 
 El proyecto sigue la estructura estándar de un proyecto Spring Boot:
+src/ ├── main/ │ ├── java/ │ │ ├── com.alura.literalura/ │ │ │ ├── model/ # Clases de entidad (Book, Author). │ │ │ ├── dto/ # Clases de transferencia de datos. │ │ │ ├── repository/ # Interfaces JPA para acceso a la base de datos. │ │ │ ├── service/ # Lógica de negocio (BookService, AuthorService). │ │ │ ├── Main.java # Punto de entrada de la aplicación. │ ├── resources/ │ ├── application.properties # Configuraciones de la base de datos.
