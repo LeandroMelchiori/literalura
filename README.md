@@ -27,35 +27,32 @@ Literalura es una aplicación desarrollada en Java utilizando Spring Boot para g
 ```markdown
 src/
 ├── main/
-│   ├── java/
-│   │   ├── com/alura/literalura/
-│   │       ├── model/               # Clases de entidad que representan las tablas de la base de datos.
-│   │       │   ├── Author.java      # Entidad que representa a un autor.
-│   │       │   ├── Book.java        # Entidad que representa un libro.
-│   │       │
-│   │       ├── dto/                 # Clases de transferencia de datos (Data Transfer Objects).
-│   │       │   ├── AuthorDTO.java   # DTO para la transferencia de datos de autores.
-│   │       │   ├── BookDTO.java     # DTO para la transferencia de datos de libros.
-│   │       │
-│   │       ├── repository/          # Repositorios JPA para interactuar con la base de datos.
-│   │       │   ├── AuthorRepository.java  # Repositorio para manejar entidades de autores.
-│   │       │   ├── BookRepository.java    # Repositorio para manejar entidades de libros.
-│   │       │
-│   │       ├── service/             # Servicios con la lógica de negocio.
-│   │       │   ├── AuthorService.java  # Servicio para manejar operaciones relacionadas con autores.
-│   │       │   ├── BookService.java    # Servicio para manejar operaciones relacionadas con libros.
-│   │       │
-│   │       ├── Main.java            # Punto de entrada de la aplicación, con interacción por consola.
-│   │
-│   ├── resources/
-│       ├── application.properties   # Archivo de configuración de Spring Boot (base de datos, etc.).
-│
-└── test/                            # Directorio para las pruebas unitarias y de integración.
-    ├── java/
-    │   ├── com/alura/literalura/    # Paquete espejo de las clases del proyecto para pruebas.
-    │       ├── model/              # Pruebas relacionadas con las entidades.
-    │       ├── service/            # Pruebas relacionadas con los servicios.
-    │       ├── repository/         # Pruebas relacionadas con los repositorios.
+   ├── java/
+   │   ├── com/alura/literalura/
+   │       ├── model/                      # Clases de entidad que representan las tablas de la base de datos.
+   │       │   ├── Author.java             # Entidad que representa a un autor.
+   │       │   ├── Book.java               # Entidad que representa un libro.
+   │       │
+   │       ├── dto/                        # Clases de transferencia de datos (Data Transfer Objects).
+   │       │   ├── AuthorDTO.java          # DTO para la transferencia de datos de autores.
+   │       │   ├── BookDTO.java            # DTO para la transferencia de datos de libros.
+   │       │
+   │       ├── repository/                 # Repositorios JPA para interactuar con la base de datos.
+   │       │   ├── AuthorRepository.java   # Repositorio para manejar entidades de autores.
+   │       │   ├── BookRepository.java     # Repositorio para manejar entidades de libros.
+   │       │
+   │       ├── service/                    # Servicios con la lógica de negocio.
+   │       │   ├── AuthorService.java      # Servicio para manejar operaciones relacionadas con autores.
+   │       │   ├── BookService.java        # Servicio para manejar operaciones relacionadas con libros.
+   │       │   ├── ConsumoApi              # Clase encargada de consumir API externa para obtener información sobre libros y autores.
+   │       │
+   │       ├── Main.java                   # Punto de entrada de la aplicación, con interacción por consola.
+   │       ├── LiteraluraApplication       # Clase principal de la aplicación.
+   │       
+   ├── resources/
+       ├── application.properties   # Archivo de configuración de Spring Boot (base de datos, etc.).
+
+
 ```
 
 ## Configuración del proyecto
