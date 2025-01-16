@@ -55,6 +55,29 @@ spring.datasource.username=tu_usuario
 spring.datasource.password=tu_contraseña
 spring.jpa.hibernate.ddl-auto=update
 ```
+## 2. Construcción
+
+### Requisitos previos
+- **Java 17** o superior.
+- **Maven 3.8** o superior.
+- **PostgreSQL** instalado y en ejecución.
+
+### Configuración de la Base de Datos
+1. Asegúrate de tener PostgreSQL en funcionamiento.
+2. Crea una base de datos llamada `literalura` ejecutando el siguiente comando:
+   ```sql
+   CREATE DATABASE literalura;
+3. Configura las credenciales de acceso en el archivo application.properties ubicado en src/main/resources/:
+   ```properties
+   spring.datasource.url=jdbc:postgresql://localhost:5432/literalura
+   spring.datasource.username=tu_usuario
+   spring.datasource.password=tu_contraseña
+   spring.jpa.hibernate.ddl-auto=update
+- Reemplaza tu_usuario y tu_contraseña con las credenciales de tu base de datos.
+
+
+
+
 
 # Ejemplo de uso
 ## Menú principal:
@@ -68,4 +91,6 @@ spring.jpa.hibernate.ddl-auto=update
 # Buscar libro por título:
 Ingrese el título del libro: Pride and Prejudice
 Resultado: Libro encontrado: [Título: Pride and Prejudice, Autor: Jane Austen, Idioma: Inglés]
+
+
 
