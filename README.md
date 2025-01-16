@@ -126,10 +126,10 @@ spring.jpa.hibernate.ddl-auto=update
    ```
 
 ## Licencia
-### Este proyecto se distribuye bajo la licencia MIT. Puedes consultar el archivo LICENSE para más detalles.
+#### Este proyecto se distribuye bajo la licencia MIT. Puedes consultar el archivo LICENSE para más detalles.
 
 ## Contribuciones
-### ¡Las contribuciones son bienvenidas! Si deseas colaborar:
+#### ¡Las contribuciones son bienvenidas! Si deseas colaborar:
 1. Haz un fork del repositorio.
 2. Crea una nueva rama (git checkout -b feature/nueva-funcionalidad).
 3. Haz tus cambios y realiza un commit (git commit -m 'Agrego nueva funcionalidad').
