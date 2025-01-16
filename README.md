@@ -56,7 +56,7 @@ src/
     │       ├── model/              # Pruebas relacionadas con las entidades.
     │       ├── service/            # Pruebas relacionadas con los servicios.
     │       ├── repository/         # Pruebas relacionadas con los repositorios.
-
+```
 
 ## Configuración del proyecto
 
