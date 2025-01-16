@@ -41,6 +41,21 @@ src/ ├── main/ │ ├── java/ │ │ ├── com.alura.literalura/
    spring.datasource.username=tu_usuario
    spring.datasource.password=tu_contraseña
 
+## Construcción y Ejecución
+
+### 1. Configurar la Base de Datos
+- Asegúrate de tener **PostgreSQL** instalado y en funcionamiento.
+- Crea una base de datos llamada `literalura`.
+- Configura las credenciales en el archivo `application.properties`.
+
+Ejemplo de configuración en `src/main/resources/application.properties`:
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/literalura
+spring.datasource.username=tu_usuario
+spring.datasource.password=tu_contraseña
+spring.jpa.hibernate.ddl-auto=update
+
+
 # Ejemplo de uso
 ## Menú principal:
 1. Buscar libro por título
