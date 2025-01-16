@@ -26,3 +26,27 @@ Literalura es una aplicación desarrollada en Java utilizando Spring Boot para g
 
 El proyecto sigue la estructura estándar de un proyecto Spring Boot:
 src/ ├── main/ │ ├── java/ │ │ ├── com.alura.literalura/ │ │ │ ├── model/ # Clases de entidad (Book, Author). │ │ │ ├── dto/ # Clases de transferencia de datos. │ │ │ ├── repository/ # Interfaces JPA para acceso a la base de datos. │ │ │ ├── service/ # Lógica de negocio (BookService, AuthorService). │ │ │ ├── Main.java # Punto de entrada de la aplicación. │ ├── resources/ │ ├── application.properties # Configuraciones de la base de datos.
+
+
+## Configuración del proyecto
+
+1. **Base de datos**:
+   - Asegúrate de tener PostgreSQL instalado y configurado.
+   - Crea una base de datos llamada `literalura`.
+   - Configura las credenciales en el archivo `application.properties`.
+
+   Ejemplo:
+   ```properties
+   spring.datasource.url=jdbc:postgresql://localhost:5432/literalura
+   spring.datasource.username=tu_usuario
+   spring.datasource.password=tu_contraseña
+
+# Ejemplo de uso
+## Menú principal:
+1. Buscar libro por título
+2. Listar todos los libros
+3. Listar libros por idioma
+4. Listar todos los autores
+5. Buscar autores vivos hasta un año específico
+0. Salir
+
