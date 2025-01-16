@@ -75,12 +75,30 @@ spring.jpa.hibernate.ddl-auto=update
    spring.jpa.hibernate.ddl-auto=update
 - Reemplaza tu_usuario y tu_contraseña con las credenciales de tu base de datos.
 
+### Construcción del Proyecto
+1. Clona el repositorio desde GitHub:
+   ```bash
+   git clone https://github.com/tu-usuario/literalura.git
+   
+2. Navega al directorio del proyecto:
+   ```bash
+   cd literalura
+3. Compila y construye el proyecto utilizando Maven:
+   ```bash
+   mvn clean install
+
+## Ejecución
+
+1. Inicia la aplicación ejecutando el archivo JAR generado:
+   ```bash
+   java -jar target/literalura-1.0.0.jar
+   
+2. Sigue las instrucciones en la consola para interactuar con las funcionalidades de la aplicación.
 
 
+## Ejemplo de Interacción
 
-
-# Ejemplo de uso
-## Menú principal:
+### Menú principal:
 1. Buscar libro por título
 2. Listar todos los libros
 3. Listar libros por idioma
@@ -88,9 +106,25 @@ spring.jpa.hibernate.ddl-auto=update
 5. Buscar autores vivos hasta un año específico
 0. Salir
 
-# Buscar libro por título:
-Ingrese el título del libro: Pride and Prejudice
-Resultado: Libro encontrado: [Título: Pride and Prejudice, Autor: Jane Austen, Idioma: Inglés]
+### Ejemplo: Buscar libro por título:
+   ```yaml
+   Ingrese el título del libro: Pride and Prejudice
+   Resultado: Libro encontrado: [Título: Pride and Prejudice, Autor: Jane Austen, Idioma: Inglés]
+   ```
+### Listar todos los autores
+   ```yaml
+   Autores registrados:
+   - [Nombre: Jane Austen, Año de nacimiento: 1775, Año de muerte: 1817]
+   - [Nombre: George Orwell, Año de nacimiento: 1903, Año de muerte: 1950]
+   ```
+
+### Buscar autores vivos hasta un año específico
+   ```yaml
+   Ingrese el año: 1800
+   Autores vivos hasta 1800:
+   - [Nombre: Jane Austen, Año de nacimiento: 1775, Año de muerte: 1817]
+
+
 
 
 
