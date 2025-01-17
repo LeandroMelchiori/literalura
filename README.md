@@ -25,7 +25,7 @@ Literalura es una aplicación desarrollada en Java utilizando Spring Boot para g
 - Crea una base de datos llamada `literalura`.
 - Configura las credenciales en el archivo `application.properties`.
 
-Ejemplo de configuración en `src/main/resources/application.properties`:
+### Ejemplo de configuración en `src/main/resources/application.properties`:
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/literalura
 spring.datasource.username=tu_usuario
@@ -35,9 +35,9 @@ spring.jpa.hibernate.ddl-auto=update
 - Reemplaza tu_usuario y tu_contraseña con las credenciales de tu base de datos.
    
 
-### Ejecución
+## Ejecución
 
-## Abrir el proyecto en IntelliJ IDEA
+### Abrir el proyecto en IntelliJ IDEA
 
 1. Abre IntelliJ IDEA.
 2. Selecciona Open y elige la carpeta raíz del proyecto donde está el archivo pom.xml.
