@@ -4,41 +4,24 @@ Literalura es una aplicación desarrollada en Java utilizando Spring Boot para g
 
 ## Funcionalidades
 
-### Libros
 - Buscar libros por título.
 - Listar todos los libros.
 - Listar libros por idioma.
-
-### Autores
 - Listar todos los autores registrados.
 - Buscar autores vivos hasta un año específico.
 
-## Tecnologías utilizadas
-- **Java 17**
-- **Spring Boot** (v3.4.1)
-- **Spring Data JPA**: Para el manejo de la persistencia.
-- **PostgreSQL**: Base de datos relacional.
-- **Hibernate ORM**: Framework de mapeo objeto-relacional.
-- **Jakarta Persistence API**: Para definir las entidades.
-- **Maven**: Como herramienta de construcción y gestión de dependencias.
+## Requisitos
+- Java 17 o superior.
+- PostgreSQL instalado y configurado.
+- Maven
+- Intellij
 
-## Configuración del proyecto
+## Construcción del Proyecto
+1. Clona el repositorio desde GitHub:
+   ```bash
+   git clone https://github.com/tu-usuario/literalura.git
 
-1. **Base de datos**:
-   - Asegúrate de tener PostgreSQL instalado y configurado.
-   - Crea una base de datos llamada `literalura`.
-   - Configura las credenciales en el archivo `application.properties`.
-
-   Ejemplo:
-   ```properties
-   spring.datasource.url=jdbc:postgresql://localhost:5432/literalura
-   spring.datasource.username=tu_usuario
-   spring.datasource.password=tu_contraseña
-
-## Construcción y Ejecución
-
-### 1. Configurar la Base de Datos
-- Asegúrate de tener **PostgreSQL** instalado y en funcionamiento.
+2. Configurar la Base de Datos
 - Crea una base de datos llamada `literalura`.
 - Configura las credenciales en el archivo `application.properties`.
 
@@ -49,56 +32,35 @@ spring.datasource.username=tu_usuario
 spring.datasource.password=tu_contraseña
 spring.jpa.hibernate.ddl-auto=update
 ```
-## 2. Construcción
-
-### Requisitos previos
-- **Java 17** o superior.
-- **Maven 3.8** o superior.
-- **PostgreSQL** instalado y en ejecución.
-
-### Configuración de la Base de Datos
-1. Asegúrate de tener PostgreSQL en funcionamiento.
-2. Crea una base de datos llamada `literalura` ejecutando el siguiente comando:
-   ```sql
-   CREATE DATABASE literalura;
-3. Configura las credenciales de acceso en el archivo application.properties ubicado en src/main/resources/:
-   ```properties
-   spring.datasource.url=jdbc:postgresql://localhost:5432/literalura
-   spring.datasource.username=tu_usuario
-   spring.datasource.password=tu_contraseña
-   spring.jpa.hibernate.ddl-auto=update
 - Reemplaza tu_usuario y tu_contraseña con las credenciales de tu base de datos.
-
-### Construcción del Proyecto
-1. Clona el repositorio desde GitHub:
-   ```bash
-   git clone https://github.com/tu-usuario/literalura.git
    
-2. Navega al directorio del proyecto:
-   ```bash
-   cd literalura
-3. Compila y construye el proyecto utilizando Maven:
-   ```bash
-   mvn clean install
 
-## Ejecución
+### Ejecución
 
-1. Inicia la aplicación ejecutando el archivo JAR generado:
-   ```bash
-   java -jar target/literalura-1.0.0.jar
+## Abrir el proyecto en IntelliJ IDEA
+
+1. Abre IntelliJ IDEA.
+2. Selecciona Open y elige la carpeta raíz del proyecto donde está el archivo pom.xml.
+3. IntelliJ configurará automáticamente el proyecto como un proyecto Maven.
+4. Navega hasta el archivo LiteraluraApplication.java en el paquete com.alura.literalura .
+5. Haz clic derecho en el archivo y selecciona Run 'LiteraluraApplication.main()'.
+6. La aplicación se ejecutará en la consola integrada de IntelliJ IDEA, mostrando el menú principal.
    
-2. Sigue las instrucciones en la consola para interactuar con las funcionalidades de la aplicación.
 
+## Ejemplo de interaccion
 
-## Ejemplo de Interacción
+### Al ejecutar la aplicación, verás un menú en la consola con las siguientes opciones:
+
 
 ### Menú principal:
+```yaml
 1. Buscar libro por título
 2. Listar todos los libros
 3. Listar libros por idioma
 4. Listar todos los autores
 5. Buscar autores vivos hasta un año específico
 0. Salir
+```
 
 ### Ejemplo: Buscar libro por título:
    ```yaml
