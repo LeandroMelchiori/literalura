@@ -39,10 +39,15 @@ spring.jpa.hibernate.ddl-auto=update
 ### 📌 Abrir el proyecto en IntelliJ IDEA
 
 🔹 1. Abre IntelliJ IDEA.
+
 🔹 2. Selecciona Open y elige la carpeta raíz del proyecto donde está el archivo pom.xml.
+
 🔹 3. IntelliJ configurará automáticamente el proyecto como un proyecto Maven.
+
 🔹 4. Navega hasta el archivo LiteraluraApplication.java en el paquete com.alura.literalura .
+
 🔹 5. Haz clic derecho en el archivo y selecciona Run 'LiteraluraApplication.main()'.
+
 🔹 6. La aplicación se ejecutará en la consola integrada de IntelliJ IDEA, mostrando el menú principal.
    
 
