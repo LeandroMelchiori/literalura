@@ -18,11 +18,11 @@
 - **Intellij**
 
 ## 🏗️ Construcción del Proyecto
-🔹 1. Clona el repositorio desde GitHub:
+ 1️⃣ Clona el repositorio desde GitHub:
    ```bash
    git clone https://github.com/tu-usuario/literalura.git
 ```
-🔹 2. Configurar la Base de Datos
+ 2️⃣ Configurar la Base de Datos
 - Crea una base de datos llamada `literalura`.
 - Configura las credenciales en el archivo `application.properties`.
 ```properties
@@ -38,17 +38,17 @@ spring.jpa.hibernate.ddl-auto=update
 
 ### 📌 Abrir el proyecto en IntelliJ IDEA
 
-🔹 1. Abre IntelliJ IDEA.
+1️⃣ Abre IntelliJ IDEA.
 
-🔹 2. Selecciona Open y elige la carpeta raíz del proyecto donde está el archivo pom.xml.
+2️⃣ Selecciona Open y elige la carpeta raíz del proyecto donde está el archivo pom.xml.
 
-🔹 3. IntelliJ configurará automáticamente el proyecto como un proyecto Maven.
+3️⃣ IntelliJ configurará automáticamente el proyecto como un proyecto Maven.
 
-🔹 4. Navega hasta el archivo LiteraluraApplication.java en el paquete com.alura.literalura .
+4️⃣ Navega hasta el archivo LiteraluraApplication.java en el paquete com.alura.literalura .
 
-🔹 5. Haz clic derecho en el archivo y selecciona Run 'LiteraluraApplication.main()'.
+5️⃣ 5. Haz clic derecho en el archivo y selecciona Run 'LiteraluraApplication.main()'.
 
-🔹 6. La aplicación se ejecutará en la consola integrada de IntelliJ IDEA, mostrando el menú principal.
+6️⃣ 6. La aplicación se ejecutará en la consola integrada de IntelliJ IDEA, mostrando el menú principal.
    
 
 ## 🚀 Ejemplo de interaccion
