@@ -27,6 +27,17 @@ services:
         fromDatabase:
           name: literalura-db
           property: password
+      # Render genera un secreto seguro (>= 32 caracteres) para firmar los JWT.
+      - key: JWT_SECRET
+        generateValue: true
+      # Credenciales del ADMIN inicial: se definen en el dashboard al desplegar.
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      # Origen del frontend (dominio de Vercel); se completa tras desplegar el SPA.
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
 
 databases:
   - name: literalura-db
