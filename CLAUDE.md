@@ -49,7 +49,9 @@ los leen reclutadores. Priorizar claridad y prolijidad sobre atajos.
   (ej: `Agregar filtro de libros por idioma`).
 - El título dice *qué* cambia; el cuerpo (si hace falta) dice *por qué*.
 - Un commit = un cambio lógico coherente. No mezclar refactors con features.
-- No incluir identificadores de modelo ni detalles internos de la herramienta.
+- **No mencionar el uso de IA ni herramientas de asistencia** en los mensajes de
+  commit ni en los cuerpos de PR (sin `Co-Authored-By`, sin "Generated with…",
+  sin identificadores de modelo). El historial refleja el trabajo, no la herramienta.
 
 ## Tests
 

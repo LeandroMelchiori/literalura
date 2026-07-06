@@ -1,6 +1,5 @@
 package com.alura.literalura.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -18,11 +17,9 @@ public class Author {
     @Column(unique = true)
     private String name;
 
-    @JsonProperty("birth_year")
     @Column
     private Integer birthYear;
 
-    @JsonProperty("death_year")
     @Column
     private Integer deathYear;
 
