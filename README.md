@@ -34,12 +34,16 @@ centralizado, migraciones versionadas, tests automatizados, Docker y CI.
   ejemplar. Listado de préstamos vencidos.
 
 **Ingeniería**
-- 📖 **Documentación OpenAPI / Swagger UI** autogenerada.
+- 🔐 **Autenticación JWT** con Spring Security y roles (`ADMIN` / `LIBRARIAN`):
+  catálogo de lectura pública, operación de biblioteca autenticada, gestión de
+  usuarios solo para ADMIN. Contraseñas con BCrypt.
+- 📖 **Documentación OpenAPI / Swagger UI** autogenerada, con soporte de Bearer token.
 - 🛡️ **Manejo de errores** consistente con `ProblemDetail` (RFC 7807); `409` para
-  violaciones de reglas de negocio.
+  violaciones de reglas de negocio, `401/403` también en formato problem.
 - 📄 **Paginación** en los listados (`?page=&size=&sort=`).
 - 🗃️ **Migraciones de esquema versionadas** con Flyway.
-- ✅ **Tests** unitarios (Mockito) y de capa web (MockMvc) sobre H2.
+- ✅ **Tests** unitarios (Mockito), de capa web (MockMvc) y de integración del flujo
+  de seguridad, sobre H2.
 - 🐳 **Docker + Docker Compose** y 🚀 **CI en GitHub Actions** + blueprint para Render.
 
 ---
@@ -50,6 +54,7 @@ centralizado, migraciones versionadas, tests automatizados, Docker y CI.
 |------|-----------|
 | Lenguaje | Java 17 |
 | Framework | Spring Boot 3.4 (Web, Data JPA, Validation, Actuator) |
+| Seguridad | Spring Security + JWT (jjwt), BCrypt |
 | Base de datos | PostgreSQL (H2 en tests) |
 | Migraciones | Flyway |
 | Documentación | springdoc-openapi (Swagger UI) |
@@ -88,18 +93,25 @@ export DB_HOST=localhost DB_PORT=5432 DB_NAME=literalura DB_USER=postgres DB_PAS
 
 Base URL: `/api`
 
-**Catálogo**
+**Autenticación** 🔓 = público &nbsp; 🔒 = requiere JWT &nbsp; 👑 = solo ADMIN
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| `POST` | `/api/books/search?title={título}` | Busca en Gutendex y cataloga el título |
+| 🔓 `POST` | `/api/auth/login` | Login del personal; devuelve el JWT |
+| 👑 `POST` | `/api/auth/users` | Crea un usuario del personal (`ADMIN`/`LIBRARIAN`) |
+
+**Catálogo** (lectura pública; catalogar requiere JWT)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| 🔒 `POST` | `/api/books/search?title={título}` | Busca en Gutendex y cataloga el título |
 | `GET`  | `/api/books` | Lista paginada de títulos |
 | `GET`  | `/api/books/language/{idioma}` | Títulos por idioma (`en`, `es`, ...), paginado |
 | `GET`  | `/api/books/stats` | Estadísticas agregadas de descargas |
 | `GET`  | `/api/authors` | Lista paginada de autores |
 | `GET`  | `/api/authors/alive?year={año}` | Autores vivos hasta ese año |
 
-**Biblioteca**
+**Biblioteca** (todo requiere JWT)
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
@@ -112,28 +124,38 @@ Base URL: `/api`
 | `POST` | `/api/loans/{id}/return` | Registra la devolución |
 | `GET`  | `/api/loans?status=&memberId=` | Lista préstamos (por estado o socio) |
 | `GET`  | `/api/loans/overdue` | Lista préstamos vencidos |
-| `GET`  | `/actuator/health` | Health check |
+
+Health check público: `GET /actuator/health`.
 
 ### Documentación interactiva
 
 - **Swagger UI:** `http://localhost:8080/swagger-ui.html`
 - **OpenAPI JSON:** `http://localhost:8080/v3/api-docs`
 
-### Ejemplo
+### Ejemplo: flujo completo
 
 ```bash
-# Registrar un libro
-curl -X POST "http://localhost:8080/api/books/search?title=pride%20and%20prejudice"
+# 1. Login (al primer arranque se crea el ADMIN inicial: admin / admin12345)
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin12345"}' | jq -r .token)
+
+# 2. Catalogar un título desde Gutendex
+curl -X POST "http://localhost:8080/api/books/search?title=pride%20and%20prejudice" \
+  -H "Authorization: Bearer $TOKEN"
+
+# 3. Registrar un ejemplar físico, un socio y un préstamo
+curl -X POST http://localhost:8080/api/copies -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -d '{"bookId":1,"inventoryCode":"A-001"}'
+curl -X POST http://localhost:8080/api/members -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Ana Díaz","email":"ana@mail.com","documentId":"12345678"}'
+curl -X POST http://localhost:8080/api/loans -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -d '{"copyId":1,"memberId":1}'
 ```
 
-```json
-{
-  "title": "Pride and Prejudice",
-  "author": { "name": "Austen, Jane", "birthYear": 1775, "deathYear": 1817 },
-  "languages": ["en"],
-  "downloadCount": 12345
-}
-```
+> ⚠️ En producción definir `JWT_SECRET`, `ADMIN_USERNAME` y `ADMIN_PASSWORD`
+> mediante variables de entorno; los valores por defecto son solo para desarrollo.
 
 ---
 

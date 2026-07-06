@@ -6,6 +6,7 @@ import com.alura.literalura.exception.BookNotFoundException;
 import com.alura.literalura.service.BookService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,7 +23,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+// Sin filtros de seguridad: este test cubre la capa web; la seguridad se prueba en AuthFlowIntegrationTest.
 @WebMvcTest(BookController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class BookControllerTest {
 
     @Autowired
