@@ -23,6 +23,21 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ProblemDetail handleResourceNotFound(ResourceNotFoundException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problem.setTitle("Recurso no encontrado");
+        return problem;
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ProblemDetail handleBusinessRule(BusinessRuleException ex) {
+        // 409: la petición es válida pero choca con el estado del dominio.
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        problem.setTitle("Regla de negocio");
+        return problem;
+    }
+
     @ExceptionHandler(ExternalApiException.class)
     public ProblemDetail handleExternalApi(ExternalApiException ex) {
         log.warn("Fallo al consultar Gutendex: {}", ex.getMessage());

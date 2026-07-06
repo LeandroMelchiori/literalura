@@ -5,31 +5,42 @@
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-**LiteraLura** es una **API REST** construida con Spring Boot que busca libros en el
-[Proyecto Gutenberg](https://gutenberg.org/) (a través de la API pública
-[Gutendex](https://gutendex.com/)), los persiste en PostgreSQL y expone consultas
-sobre libros y autores. Incluye documentación interactiva con Swagger, manejo de
-errores centralizado, tests automatizados, contenedorización con Docker y despliegue
-continuo.
+**LiteraLura** es una **API REST** de gestión de biblioteca construida con Spring Boot.
+Cataloga títulos (importándolos del [Proyecto Gutenberg](https://gutenberg.org/) vía la
+API [Gutendex](https://gutendex.com/)), administra los **ejemplares físicos** de cada
+título, los **socios** de la biblioteca y el ciclo de **préstamos y devoluciones**, con
+sus reglas de negocio. Incluye documentación interactiva con Swagger, manejo de errores
+centralizado, migraciones versionadas, tests automatizados, Docker y CI.
 
-> Originalmente un desafío de consola de Alura, reconvertido en un servicio web
-> desplegable y documentado.
+> Originalmente un desafío de consola de Alura, reconvertido primero en una API REST
+> y luego en un sistema de gestión de biblioteca con un dominio real.
 
 ---
 
 ## ✨ Características
 
-- 🔎 **Búsqueda y registro** de libros por título desde Gutendex.
-- 📚 **Listado** de libros, con filtro por idioma.
+**Catálogo (Proyecto Gutenberg)**
+- 🔎 **Búsqueda e importación** de títulos por nombre desde Gutendex.
+- 📚 **Listado** de títulos con filtro por idioma y **estadísticas** de descargas.
 - 👤 **Consulta de autores**, incluyendo autores vivos en un año dado.
-- 📊 **Estadísticas** agregadas de descargas (promedio, máximo, mínimo).
+
+**Gestión de biblioteca**
+- 📗 **Ejemplares**: registro de copias físicas por título, con estado (disponible /
+  prestado / dado de baja).
+- 🧑‍🤝‍🧑 **Socios**: alta con validación de email/documento únicos y estado (activo /
+  suspendido).
+- 🔁 **Préstamos y devoluciones** con reglas de negocio: solo se presta un ejemplar
+  disponible, a un socio activo y sin préstamos vencidos; la devolución libera el
+  ejemplar. Listado de préstamos vencidos.
+
+**Ingeniería**
 - 📖 **Documentación OpenAPI / Swagger UI** autogenerada.
-- 🛡️ **Manejo de errores** consistente con `ProblemDetail` (RFC 7807).
+- 🛡️ **Manejo de errores** consistente con `ProblemDetail` (RFC 7807); `409` para
+  violaciones de reglas de negocio.
 - 📄 **Paginación** en los listados (`?page=&size=&sort=`).
 - 🗃️ **Migraciones de esquema versionadas** con Flyway.
 - ✅ **Tests** unitarios (Mockito) y de capa web (MockMvc) sobre H2.
-- 🐳 **Docker + Docker Compose** listos para levantar la app con su base de datos.
-- 🚀 **CI en GitHub Actions** y blueprint de despliegue para Render.
+- 🐳 **Docker + Docker Compose** y 🚀 **CI en GitHub Actions** + blueprint para Render.
 
 ---
 
@@ -77,14 +88,30 @@ export DB_HOST=localhost DB_PORT=5432 DB_NAME=literalura DB_USER=postgres DB_PAS
 
 Base URL: `/api`
 
+**Catálogo**
+
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| `POST` | `/api/books/search?title={título}` | Busca en Gutendex y registra el libro |
-| `GET`  | `/api/books` | Lista paginada de libros registrados |
-| `GET`  | `/api/books/language/{idioma}` | Libros por idioma (`en`, `es`, ...), paginado |
+| `POST` | `/api/books/search?title={título}` | Busca en Gutendex y cataloga el título |
+| `GET`  | `/api/books` | Lista paginada de títulos |
+| `GET`  | `/api/books/language/{idioma}` | Títulos por idioma (`en`, `es`, ...), paginado |
 | `GET`  | `/api/books/stats` | Estadísticas agregadas de descargas |
-| `GET`  | `/api/authors` | Lista todos los autores |
+| `GET`  | `/api/authors` | Lista paginada de autores |
 | `GET`  | `/api/authors/alive?year={año}` | Autores vivos hasta ese año |
+
+**Biblioteca**
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `POST` | `/api/copies` | Registra un ejemplar físico de un título |
+| `GET`  | `/api/copies?status={estado}` | Lista ejemplares, filtrable por estado |
+| `POST` | `/api/members` | Da de alta un socio |
+| `GET`  | `/api/members` | Lista paginada de socios |
+| `PATCH`| `/api/members/{id}/status?status={estado}` | Activa o suspende un socio |
+| `POST` | `/api/loans` | Registra un préstamo (`{copyId, memberId}`) |
+| `POST` | `/api/loans/{id}/return` | Registra la devolución |
+| `GET`  | `/api/loans?status=&memberId=` | Lista préstamos (por estado o socio) |
+| `GET`  | `/api/loans/overdue` | Lista préstamos vencidos |
 | `GET`  | `/actuator/health` | Health check |
 
 ### Documentación interactiva
