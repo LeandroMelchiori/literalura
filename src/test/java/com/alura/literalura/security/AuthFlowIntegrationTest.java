@@ -68,6 +68,18 @@ class AuthFlowIntegrationTest {
     }
 
     @Test
+    void listarUsuariosEsSoloParaAdmin() throws Exception {
+        String adminToken = loginAs("admin", "admin12345");
+        mockMvc.perform(get("/api/auth/users").header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].username").exists());
+
+        String demoToken = loginAs("demo", "demo12345");
+        mockMvc.perform(get("/api/auth/users").header("Authorization", "Bearer " + demoToken))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void elUsuarioDemoQuedaSeedeadoYOperaComoBibliotecario() throws Exception {
         String demoToken = loginAs("demo", "demo12345");
 
