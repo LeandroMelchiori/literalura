@@ -36,7 +36,7 @@ class BookControllerTest {
 
     @Test
     void searchDevuelve201YElLibro() throws Exception {
-        BookDTO dto = new BookDTO("Pride and Prejudice",
+        BookDTO dto = new BookDTO(1L, "Pride and Prejudice",
                 new AuthorDTO("Austen, Jane", 1775, 1817), List.of("en"), 12345);
         when(bookService.buscarYRegistrarLibro(anyString())).thenReturn(dto);
 
@@ -65,7 +65,7 @@ class BookControllerTest {
     void listarTodosDevuelvePaginaConContenido() throws Exception {
         when(bookService.obtenerTodosLosLibros(any(Pageable.class))).thenReturn(
                 new PageImpl<>(List.of(
-                        new BookDTO("A", new AuthorDTO("X", null, null), List.of("en"), 1))));
+                        new BookDTO(1L, "A", new AuthorDTO("X", null, null), List.of("en"), 1))));
 
         mockMvc.perform(get("/api/books"))
                 .andExpect(status().isOk())

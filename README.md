@@ -61,6 +61,7 @@ centralizado, migraciones versionadas, tests automatizados, Docker y CI.
 | Cliente HTTP | `java.net.http.HttpClient` |
 | Tests | JUnit 5, Mockito, Spring MockMvc |
 | Build | Maven |
+| Frontend | React 18 + Vite (SPA en `frontend/`) |
 | Infra | Docker, Docker Compose, GitHub Actions, Render |
 
 ---
@@ -156,6 +157,24 @@ curl -X POST http://localhost:8080/api/loans -H "Authorization: Bearer $TOKEN" \
 
 > ⚠️ En producción definir `JWT_SECRET`, `ADMIN_USERNAME` y `ADMIN_PASSWORD`
 > mediante variables de entorno; los valores por defecto son solo para desarrollo.
+
+---
+
+## 💻 Frontend (React)
+
+SPA en [`frontend/`](frontend/) que consume esta API: catálogo público, login del
+personal y operación de la biblioteca (ejemplares, socios, préstamos) con manejo
+visible de estados de carga, error y reglas de negocio.
+
+```bash
+cd frontend
+npm install
+npm run dev        # http://localhost:5173 (proxya /api al backend local)
+```
+
+En producción el frontend se despliega aparte (p. ej. Vercel) definiendo
+`VITE_API_URL` con el dominio de la API, cuyo CORS se configura con
+`CORS_ALLOWED_ORIGINS`.
 
 ---
 

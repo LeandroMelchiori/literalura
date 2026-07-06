@@ -109,7 +109,8 @@ public class BookService {
                 : new AuthorDTO("Desconocido", null, null);
 
         int downloads = book.downloadCount() != null ? book.downloadCount() : 0;
-        return new BookDTO(book.title(), author, book.languages(), downloads);
+        // Sin id: es la representación de Gutendex previa a persistir.
+        return new BookDTO(null, book.title(), author, book.languages(), downloads);
     }
 
     private BookDTO toDto(Book book) {
@@ -119,6 +120,7 @@ public class BookService {
                 author.getBirthYear(),
                 author.getDeathYear());
         return new BookDTO(
+                book.getId(),
                 book.getTitle(),
                 authorDTO,
                 List.of(book.getLanguage()),

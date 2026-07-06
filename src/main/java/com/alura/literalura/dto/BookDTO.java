@@ -5,9 +5,9 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record BookDTO(
+        Long id,
         String title,
         AuthorDTO author,
         List<String> languages,
         int downloadCount) {
 }
-
