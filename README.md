@@ -176,6 +176,9 @@ En producción el frontend se despliega aparte (p. ej. Vercel) definiendo
 `VITE_API_URL` con el dominio de la API, cuyo CORS se configura con
 `CORS_ALLOWED_ORIGINS`.
 
+La guía completa de despliegue (Render + Vercel) está en
+[`docs/DEPLOY.md`](docs/DEPLOY.md).
+
 ---
 
 ## ✅ Tests
