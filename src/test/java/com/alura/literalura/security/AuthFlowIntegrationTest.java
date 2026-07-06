@@ -68,6 +68,21 @@ class AuthFlowIntegrationTest {
     }
 
     @Test
+    void elUsuarioDemoQuedaSeedeadoYOperaComoBibliotecario() throws Exception {
+        String demoToken = loginAs("demo", "demo12345");
+
+        // Puede operar la biblioteca...
+        mockMvc.perform(get("/api/loans").header("Authorization", "Bearer " + demoToken))
+                .andExpect(status().isOk());
+        // ...pero no crear usuarios (eso es solo ADMIN).
+        mockMvc.perform(post("/api/auth/users")
+                        .header("Authorization", "Bearer " + demoToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"x\",\"password\":\"password123\",\"role\":\"LIBRARIAN\"}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void soloElAdminPuedeCrearUsuarios() throws Exception {
         String adminToken = loginAs("admin", "admin12345");
 

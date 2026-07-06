@@ -65,5 +65,6 @@ automáticamente el backend en Render y el frontend en Vercel.
 | `DB_HOST` / `DB_PORT` / `DB_NAME` / `DB_USER` / `DB_PASSWORD` | Render | Conexión a PostgreSQL (las provee Render) |
 | `JWT_SECRET` | Render | Clave para firmar los JWT (≥ 32 caracteres) |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Render | Credenciales del ADMIN inicial |
+| `DEMO_ENABLED` / `DEMO_USERNAME` / `DEMO_PASSWORD` | Render | Bibliotecario de demostración público (activo por defecto; `DEMO_ENABLED=false` para desactivarlo) |
 | `CORS_ALLOWED_ORIGINS` | Render | Orígenes del frontend permitidos |
 | `VITE_API_URL` | Vercel | URL base de la API que consume el SPA |

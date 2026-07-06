@@ -17,6 +17,25 @@ centralizado, migraciones versionadas, tests automatizados, Docker y CI.
 
 ---
 
+## 🌐 Demo en vivo
+
+<!-- Reemplazar con las URLs reales tras desplegar (ver docs/DEPLOY.md). -->
+
+- **Aplicación:** _(pendiente — completar con la URL de Vercel)_
+- **API + Swagger:** _(pendiente — completar con la URL de Render + `/swagger-ui.html`)_
+
+**Usuario de demostración** (rol bibliotecario, para probar la operación completa):
+
+| Usuario | Contraseña |
+|---------|-----------|
+| `demo`  | `demo12345` |
+
+> El catálogo es de lectura pública; iniciar sesión con el usuario de demostración
+> habilita ejemplares, socios y préstamos. El plan gratuito de Render duerme el
+> servicio tras inactividad: la primera petición puede tardar unos segundos.
+
+---
+
 ## ✨ Características
 
 **Catálogo (Proyecto Gutenberg)**
