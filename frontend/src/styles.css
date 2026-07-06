@@ -104,6 +104,12 @@ h2 {
   color: #fff;
 }
 
+.header__user {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
 /* ===== Layout ===== */
 .main {
   max-width: 64rem;

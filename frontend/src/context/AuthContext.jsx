@@ -4,23 +4,38 @@ import { clearToken, getToken, setToken } from '../api/client';
 
 const AuthContext = createContext(null);
 
+/** Lee el claim `role` del JWT sin verificar la firma (eso lo hace el backend). */
+function roleFromToken(token) {
+  if (!token) return null;
+  try {
+    const payload = token.split('.')[1];
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(json).role ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }) {
-  const [authenticated, setAuthenticated] = useState(() => Boolean(getToken()));
+  const [role, setRole] = useState(() => roleFromToken(getToken()));
+  const authenticated = role !== null;
 
   const value = useMemo(
     () => ({
       authenticated,
+      role,
+      isAdmin: role === 'ADMIN',
       async login(username, password) {
         const { token } = await authApi.login(username, password);
         setToken(token);
-        setAuthenticated(true);
+        setRole(roleFromToken(token));
       },
       logout() {
         clearToken();
-        setAuthenticated(false);
+        setRole(null);
       },
     }),
-    [authenticated],
+    [authenticated, role],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

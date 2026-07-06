@@ -5,19 +5,23 @@ import { CopiesPage } from './pages/CopiesPage';
 import { LoansPage } from './pages/LoansPage';
 import { LoginPage } from './pages/LoginPage';
 import { MembersPage } from './pages/MembersPage';
+import { UsersPage } from './pages/UsersPage';
 
-/** Redirige a login guardando de dónde venía, para volver después. */
-function RequireAuth({ children }) {
-  const { authenticated } = useAuth();
+/** Exige autenticación y, opcionalmente, un rol; si falta, redirige. */
+function RequireAuth({ children, requireAdmin = false }) {
+  const { authenticated, isAdmin } = useAuth();
   const location = useLocation();
   if (!authenticated) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/" replace />;
   }
   return children;
 }
 
 function Header() {
-  const { authenticated, logout } = useAuth();
+  const { authenticated, isAdmin, role, logout } = useAuth();
   return (
     <header className="header">
       <div className="header__inner">
@@ -29,13 +33,19 @@ function Header() {
               <NavLink to="/copies">Ejemplares</NavLink>
               <NavLink to="/members">Socios</NavLink>
               <NavLink to="/loans">Préstamos</NavLink>
+              {isAdmin && <NavLink to="/users">Usuarios</NavLink>}
             </>
           )}
         </nav>
         {authenticated ? (
-          <button type="button" className="btn btn--secondary btn--small" onClick={logout}>
-            Salir
-          </button>
+          <div className="header__user">
+            <span className="badge badge--muted">
+              {role === 'ADMIN' ? 'Administrador' : 'Bibliotecario'}
+            </span>
+            <button type="button" className="btn btn--secondary btn--small" onClick={logout}>
+              Salir
+            </button>
+          </div>
         ) : (
           <NavLink to="/login" className="btn btn--small">
             Ingresar
@@ -76,6 +86,14 @@ export function App() {
               element={
                 <RequireAuth>
                   <LoansPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <RequireAuth requireAdmin>
+                  <UsersPage />
                 </RequireAuth>
               }
             />

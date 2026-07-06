@@ -54,8 +54,10 @@ centralizado, migraciones versionadas, tests automatizados, Docker y CI.
 
 **Ingeniería**
 - 🔐 **Autenticación JWT** con Spring Security y roles (`ADMIN` / `LIBRARIAN`):
-  catálogo de lectura pública, operación de biblioteca autenticada, gestión de
-  usuarios solo para ADMIN. Contraseñas con BCrypt.
+  catálogo de lectura pública, operación de biblioteca autenticada, y gestión de
+  usuarios exclusiva del ADMIN. La separación de roles es de punta a punta: el
+  frontend lee el rol del token y muestra la sección "Usuarios" solo al admin.
+  Contraseñas con BCrypt.
 - 📖 **Documentación OpenAPI / Swagger UI** autogenerada, con soporte de Bearer token.
 - 🛡️ **Manejo de errores** consistente con `ProblemDetail` (RFC 7807); `409` para
   violaciones de reglas de negocio, `401/403` también en formato problem.
@@ -118,6 +120,7 @@ Base URL: `/api`
 | Método | Ruta | Descripción |
 |--------|------|-------------|
 | 🔓 `POST` | `/api/auth/login` | Login del personal; devuelve el JWT |
+| 👑 `GET`  | `/api/auth/users` | Lista los usuarios del personal |
 | 👑 `POST` | `/api/auth/users` | Crea un usuario del personal (`ADMIN`/`LIBRARIAN`) |
 
 **Catálogo** (lectura pública; catalogar requiere JWT)
