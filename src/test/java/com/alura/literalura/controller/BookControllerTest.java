@@ -10,8 +10,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -55,12 +59,14 @@ class BookControllerTest {
     }
 
     @Test
-    void listarTodosDevuelveArray() throws Exception {
-        when(bookService.obtenerTodosLosLibros()).thenReturn(List.of(
-                new BookDTO("A", new AuthorDTO("X", null, null), List.of("en"), 1)));
+    void listarTodosDevuelvePaginaConContenido() throws Exception {
+        when(bookService.obtenerTodosLosLibros(any(Pageable.class))).thenReturn(
+                new PageImpl<>(List.of(
+                        new BookDTO("A", new AuthorDTO("X", null, null), List.of("en"), 1))));
 
         mockMvc.perform(get("/api/books"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("A"));
+                .andExpect(jsonPath("$.content[0].title").value("A"))
+                .andExpect(jsonPath("$.totalElements").value(1));
     }
 }

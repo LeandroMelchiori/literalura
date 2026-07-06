@@ -3,11 +3,10 @@ package com.alura.literalura.service;
 import com.alura.literalura.dto.AuthorDTO;
 import com.alura.literalura.model.Author;
 import com.alura.literalura.repository.AuthorRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AuthorService {
@@ -25,17 +24,13 @@ public class AuthorService {
     }
 
     @Transactional(readOnly = true)
-    public List<AuthorDTO> obtenerTodosLosAutores() {
-        return repository.findAll().stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
+    public Page<AuthorDTO> obtenerTodosLosAutores(Pageable pageable) {
+        return repository.findAll(pageable).map(this::toDto);
     }
 
     @Transactional(readOnly = true)
-    public List<AuthorDTO> obtenerAutoresVivosHasta(int year) {
-        return repository.findAuthorsAliveUntil(year).stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
+    public Page<AuthorDTO> obtenerAutoresVivosHasta(int year, Pageable pageable) {
+        return repository.findAuthorsAliveUntil(year, pageable).map(this::toDto);
     }
 
     @Transactional(readOnly = true)

@@ -25,6 +25,8 @@ continuo.
 - 📊 **Estadísticas** agregadas de descargas (promedio, máximo, mínimo).
 - 📖 **Documentación OpenAPI / Swagger UI** autogenerada.
 - 🛡️ **Manejo de errores** consistente con `ProblemDetail` (RFC 7807).
+- 📄 **Paginación** en los listados (`?page=&size=&sort=`).
+- 🗃️ **Migraciones de esquema versionadas** con Flyway.
 - ✅ **Tests** unitarios (Mockito) y de capa web (MockMvc) sobre H2.
 - 🐳 **Docker + Docker Compose** listos para levantar la app con su base de datos.
 - 🚀 **CI en GitHub Actions** y blueprint de despliegue para Render.
@@ -38,6 +40,7 @@ continuo.
 | Lenguaje | Java 17 |
 | Framework | Spring Boot 3.4 (Web, Data JPA, Validation, Actuator) |
 | Base de datos | PostgreSQL (H2 en tests) |
+| Migraciones | Flyway |
 | Documentación | springdoc-openapi (Swagger UI) |
 | Cliente HTTP | `java.net.http.HttpClient` |
 | Tests | JUnit 5, Mockito, Spring MockMvc |
@@ -77,8 +80,8 @@ Base URL: `/api`
 | Método | Ruta | Descripción |
 |--------|------|-------------|
 | `POST` | `/api/books/search?title={título}` | Busca en Gutendex y registra el libro |
-| `GET`  | `/api/books` | Lista todos los libros registrados |
-| `GET`  | `/api/books/language/{idioma}` | Filtra libros por idioma (`en`, `es`, ...) |
+| `GET`  | `/api/books` | Lista paginada de libros registrados |
+| `GET`  | `/api/books/language/{idioma}` | Libros por idioma (`en`, `es`, ...), paginado |
 | `GET`  | `/api/books/stats` | Estadísticas agregadas de descargas |
 | `GET`  | `/api/authors` | Lista todos los autores |
 | `GET`  | `/api/authors/alive?year={año}` | Autores vivos hasta ese año |

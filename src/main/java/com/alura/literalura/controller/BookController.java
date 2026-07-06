@@ -6,12 +6,13 @@ import com.alura.literalura.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/books")
@@ -33,16 +34,17 @@ public class BookController {
                 .body(bookService.buscarYRegistrarLibro(title));
     }
 
-    @Operation(summary = "Lista todos los libros registrados")
+    @Operation(summary = "Lista de forma paginada los libros registrados")
     @GetMapping
-    public List<BookDTO> listarTodos() {
-        return bookService.obtenerTodosLosLibros();
+    public Page<BookDTO> listarTodos(@PageableDefault(size = 20) Pageable pageable) {
+        return bookService.obtenerTodosLosLibros(pageable);
     }
 
     @Operation(summary = "Lista libros filtrados por idioma (código ISO, ej: 'en', 'es')")
     @GetMapping("/language/{language}")
-    public List<BookDTO> listarPorIdioma(@PathVariable String language) {
-        return bookService.obtenerLibrosPorIdioma(language);
+    public Page<BookDTO> listarPorIdioma(@PathVariable String language,
+                                         @PageableDefault(size = 20) Pageable pageable) {
+        return bookService.obtenerLibrosPorIdioma(language, pageable);
     }
 
     @Operation(summary = "Devuelve estadísticas agregadas de la biblioteca")
