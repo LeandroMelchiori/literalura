@@ -3,144 +3,137 @@ package com.alura.literalura.service;
 import com.alura.literalura.dto.ApiResponse;
 import com.alura.literalura.dto.AuthorDTO;
 import com.alura.literalura.dto.BookDTO;
+import com.alura.literalura.dto.StatsDTO;
+import com.alura.literalura.exception.BookNotFoundException;
+import com.alura.literalura.exception.ExternalApiException;
 import com.alura.literalura.model.Author;
 import com.alura.literalura.model.Book;
 import com.alura.literalura.repository.BookRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class BookService {
-    @Autowired
-    private BookRepository repository;
 
-    @Autowired
-    private AuthorService authorService;
+    private static final String GUTENDEX_URL = "https://gutendex.com/books/?search=";
 
-    @Autowired
-    private ConsumoAPI consumoAPI;
+    private final BookRepository repository;
+    private final AuthorService authorService;
+    private final ConsumoAPI consumoAPI;
+    private final ObjectMapper objectMapper;
 
-    @Transactional
+    public BookService(BookRepository repository,
+                       AuthorService authorService,
+                       ConsumoAPI consumoAPI,
+                       ObjectMapper objectMapper) {
+        this.repository = repository;
+        this.authorService = authorService;
+        this.consumoAPI = consumoAPI;
+        this.objectMapper = objectMapper;
+    }
+
+    @Transactional(readOnly = true)
     public List<BookDTO> obtenerTodosLosLibros() {
-        List<Book> libros = repository.findAll(); // Carga libros
-        return libros.stream()
-                .map(this::toDto) // Convierte a DTO (si accede a relaciones lazy, la sesión estará activa)
+        return repository.findAllWithAuthor().stream()
+                .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
-
+    @Transactional(readOnly = true)
     public List<BookDTO> obtenerLibrosPorIdioma(String idioma) {
-        return convierteDatos(repository.findByLanguage(idioma));
+        return repository.findByLanguage(idioma).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
-    public BookDTO buscarLibroPorTitulo(String titulo) {
-        String url = "https://gutendex.com/books/?search=" + titulo.replace(" ", "+");
+    @Transactional(readOnly = true)
+    public StatsDTO obtenerEstadisticas() {
+        List<Book> libros = repository.findAll();
+        var stats = libros.stream()
+                .mapToInt(Book::getDownloadCount)
+                .summaryStatistics();
+        return new StatsDTO(
+                libros.size(),
+                authorService.contarAutores(),
+                libros.isEmpty() ? 0.0 : stats.getAverage(),
+                libros.isEmpty() ? 0 : stats.getMax(),
+                libros.isEmpty() ? 0 : stats.getMin());
+    }
+
+    /**
+     * Busca un libro en Gutendex por título. Si lo encuentra, lo persiste
+     * (junto a su autor) evitando duplicados y devuelve su representación.
+     */
+    @Transactional
+    public BookDTO buscarYRegistrarLibro(String titulo) {
+        String url = GUTENDEX_URL + titulo.replace(" ", "+");
         String jsonResponse = consumoAPI.obtenerDatos(url);
 
+        ApiResponse response = deserializar(jsonResponse);
+        if (response.getResults() == null || response.getResults().isEmpty()) {
+            throw new BookNotFoundException(titulo);
+        }
+
+        BookDTO bookDTO = toBookDTO(response.getResults().get(0));
+
+        return repository.findByTitle(bookDTO.title())
+                .map(this::toDto)
+                .orElseGet(() -> {
+                    Author author = authorService.guardarAutor(new Author(
+                            bookDTO.author().name(),
+                            bookDTO.author().birthYear(),
+                            bookDTO.author().deathYear()));
+                    Book book = toEntity(bookDTO);
+                    book.setAuthor(author);
+                    return toDto(repository.save(book));
+                });
+    }
+
+    private ApiResponse deserializar(String json) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            ApiResponse response = objectMapper.readValue(jsonResponse, ApiResponse.class);
-
-            if (response.getResults().isEmpty()) {
-                System.out.println("No se encontraron libros con el título proporcionado.");
-                return null;
-            }
-
-            BookDTO bookDTO = getBookDTO(response);
-
-            // Crear o buscar autor
-            Author author = new Author(
-                    bookDTO.author().name(),
-                    bookDTO.author().birth_year(),
-                    bookDTO.author().death_year()
-            );
-            author = authorService.guardarAutor(author); // Obtiene una entidad gestionada
-
-            // Verificar si el libro ya existe
-            if (repository.findByTitle(bookDTO.title()).isPresent()) {
-                System.out.println("El libro ya está registrado.");
-                return bookDTO; // Retorna el libro existente
-            }
-
-            // Crear y guardar el libro
-            Book book = toEntity(bookDTO);
-            book.setAuthor(author); // Asocia el autor al libro
-            repository.save(book);
-
-            return bookDTO;
-        } catch (Exception e) {
-            throw new RuntimeException("Error al procesar la respuesta JSON: " + e.getMessage(), e);
+            return objectMapper.readValue(json, ApiResponse.class);
+        } catch (JsonProcessingException e) {
+            throw new ExternalApiException("No se pudo interpretar la respuesta de Gutendex.", e);
         }
     }
 
-
-    private static BookDTO getBookDTO(ApiResponse response) {
-        var result = response.getResults().get(0);
-
-        // Seleccionar el primer autor, o un autor predeterminado si no hay ninguno
-        AuthorDTO author = result.getAuthors() != null && !result.getAuthors().isEmpty()
+    private BookDTO toBookDTO(ApiResponse.Result result) {
+        AuthorDTO author = (result.getAuthors() != null && !result.getAuthors().isEmpty())
                 ? new AuthorDTO(
-                result.getAuthors().get(0).getName(),
-                result.getAuthors().get(0).getBirthYear(),
-                result.getAuthors().get(0).getDeathYear()
-        )
+                        result.getAuthors().get(0).getName(),
+                        result.getAuthors().get(0).getBirthYear(),
+                        result.getAuthors().get(0).getDeathYear())
                 : new AuthorDTO("Desconocido", null, null);
 
         return new BookDTO(
                 result.getTitle(),
                 author,
                 result.getLanguages(),
-                result.getDownloadCount()
-        );
-    }
-
-    private List<BookDTO> convierteDatos(List<Book> books) {
-        return books.stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
+                result.getDownloadCount());
     }
 
     private BookDTO toDto(Book book) {
-        Author author = book.getAuthor(); // Obtenemos el autor del modelo Book
-
-        // Convertimos el Author a AuthorDTO
+        Author author = book.getAuthor();
         AuthorDTO authorDTO = new AuthorDTO(
                 author.getName(),
                 author.getBirthYear(),
-                author.getDeathYear()
-        );
-
-        // Creamos el BookDTO usando el AuthorDTO
+                author.getDeathYear());
         return new BookDTO(
                 book.getTitle(),
                 authorDTO,
-                List.of(book.getLanguage()), // Convertimos el idioma a una lista
-                book.getDownloadCount()
-        );
+                List.of(book.getLanguage()),
+                book.getDownloadCount());
     }
 
     private Book toEntity(BookDTO bookDTO) {
-        Author author = new Author(
-                bookDTO.author().name(),
-                bookDTO.author().birth_year(),
-                bookDTO.author().death_year()
-        );
-
-        String language = bookDTO.languages() != null && !bookDTO.languages().isEmpty()
+        String language = (bookDTO.languages() != null && !bookDTO.languages().isEmpty())
                 ? bookDTO.languages().get(0)
                 : "Desconocido";
-
-        return new Book(
-                bookDTO.title(),
-                author,
-                language,
-                bookDTO.downloadCount()
-        );
+        return new Book(bookDTO.title(), null, language, bookDTO.downloadCount());
     }
-
 }

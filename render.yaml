@@ -1,0 +1,34 @@
+# Blueprint de despliegue para Render (https://render.com)
+# Crea una base de datos PostgreSQL y un servicio web a partir del Dockerfile.
+services:
+  - type: web
+    name: literalura-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: literalura-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: literalura-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: literalura-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: literalura-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: literalura-db
+          property: password
+
+databases:
+  - name: literalura-db
+    plan: free
+    databaseName: literalura

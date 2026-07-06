@@ -1,40 +1,49 @@
 package com.alura.literalura.service;
 
+import com.alura.literalura.dto.AuthorDTO;
 import com.alura.literalura.model.Author;
 import com.alura.literalura.repository.AuthorRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class AuthorService {
 
-    @Autowired
-    private AuthorRepository repository;
+    private final AuthorRepository repository;
 
+    public AuthorService(AuthorRepository repository) {
+        this.repository = repository;
+    }
+
+    @Transactional
     public Author guardarAutor(Author author) {
-        Optional<Author> existente = repository.findByName(author.getName());
-        if (existente.isPresent()) {
-            return existente.get(); // Devuelve la entidad existente, que ya está gestionada
-        }
-        return repository.save(author); // Guarda y devuelve una nueva entidad gestionada
+        return repository.findByName(author.getName())
+                .orElseGet(() -> repository.save(author));
     }
 
-    // Método para obtener todos los autores registrados
-    public List<Author> obtenerTodosLosAutores() {
-        return repository.findAll();
+    @Transactional(readOnly = true)
+    public List<AuthorDTO> obtenerTodosLosAutores() {
+        return repository.findAll().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
-    // Método para obtener autores vivos hasta un año específico
-    public List<Author> obtenerAutoresVivosHasta(int year) {
-        return repository.findAuthorsAliveUntil(year);
+    @Transactional(readOnly = true)
+    public List<AuthorDTO> obtenerAutoresVivosHasta(int year) {
+        return repository.findAuthorsAliveUntil(year).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public long contarAutores() {
+        return repository.count();
+    }
+
+    private AuthorDTO toDto(Author author) {
+        return new AuthorDTO(author.getName(), author.getBirthYear(), author.getDeathYear());
     }
 }
-
-
-
