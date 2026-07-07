@@ -10,6 +10,8 @@ function RegisterMemberForm({ onRegistered }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [documentId, setDocumentId] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [feedback, setFeedback] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -22,11 +24,15 @@ function RegisterMemberForm({ onRegistered }) {
         name: name.trim(),
         email: email.trim(),
         documentId: documentId.trim(),
+        username: username.trim(),
+        password,
       });
-      setFeedback({ ok: true, text: `Socio «${member.name}» dado de alta.` });
+      setFeedback({ ok: true, text: `Socio «${member.name}» dado de alta con acceso al portal.` });
       setName('');
       setEmail('');
       setDocumentId('');
+      setUsername('');
+      setPassword('');
       onRegistered();
     } catch (err) {
       setFeedback({ ok: false, text: err.message });
@@ -38,10 +44,25 @@ function RegisterMemberForm({ onRegistered }) {
   return (
     <form className="card form-inline" onSubmit={handleSubmit}>
       <h2>Alta de socio</h2>
+      <p className="muted">
+        Se crea el socio y su acceso al portal. Validá la identidad de la persona
+        antes de darle de alta.
+      </p>
       <div className="form-inline__row">
         <FormField id="member-name" label="Nombre" value={name} onChange={setName} />
         <FormField id="member-email" label="Email" type="email" value={email} onChange={setEmail} />
         <FormField id="member-doc" label="Documento" value={documentId} onChange={setDocumentId} />
+      </div>
+      <div className="form-inline__row">
+        <FormField id="member-user" label="Usuario (login)" value={username} onChange={setUsername} />
+        <FormField
+          id="member-pass"
+          label="Contraseña (mín. 8)"
+          type="password"
+          value={password}
+          onChange={setPassword}
+          minLength={8}
+        />
         <button type="submit" className="btn" disabled={submitting}>
           {submitting ? 'Guardando…' : 'Dar de alta'}
         </button>

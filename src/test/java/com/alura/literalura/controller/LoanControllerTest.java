@@ -30,6 +30,9 @@ class LoanControllerTest {
     @MockBean
     private LoanService loanService;
 
+    @MockBean
+    private com.alura.literalura.service.CurrentUserService currentUserService;
+
     private LoanDTO sampleLoan() {
         return new LoanDTO(1L, 10L, "A-001", "Pride and Prejudice",
                 2L, "Ana Díaz", LocalDate.now(), LocalDate.now().plusDays(14),

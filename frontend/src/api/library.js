@@ -29,6 +29,11 @@ export function listLoans(page = 0, size = 10, status = '') {
   return request(`/api/loans?page=${page}&size=${size}${filter}`);
 }
 
+// Préstamos del cliente autenticado.
+export function listMyLoans(page = 0, size = 10) {
+  return request(`/api/loans/mine?page=${page}&size=${size}`);
+}
+
 export function listOverdueLoans() {
   return request('/api/loans/overdue');
 }

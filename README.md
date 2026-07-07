@@ -26,13 +26,15 @@ centralizado, migraciones versionadas, tests automatizados, Docker y CI.
 
 **Usuario de demostración** (rol bibliotecario, para probar la operación completa):
 
-| Usuario | Contraseña |
-|---------|-----------|
-| `demo`  | `demo12345` |
+| Usuario | Contraseña | Rol |
+|---------|-----------|-----|
+| `demo`  | `demo12345` | Bibliotecario |
 
-> El catálogo es de lectura pública; iniciar sesión con el usuario de demostración
-> habilita ejemplares, socios y préstamos. El plan gratuito de Render duerme el
-> servicio tras inactividad: la primera petición puede tardar unos segundos.
+> El catálogo es de lectura pública. Con el usuario `demo` (bibliotecario) se
+> puede operar la biblioteca **y dar de alta socios con su acceso**; iniciando
+> sesión luego con ese socio se ve el **portal del cliente** (reservar títulos,
+> "mis préstamos", "mis reservas"). El plan gratuito de Render duerme el servicio
+> tras inactividad: la primera petición puede tardar unos segundos.
 
 ---
 
@@ -43,20 +45,27 @@ centralizado, migraciones versionadas, tests automatizados, Docker y CI.
 - 📚 **Listado** de títulos con filtro por idioma y **estadísticas** de descargas.
 - 👤 **Consulta de autores**, incluyendo autores vivos en un año dado.
 
-**Gestión de biblioteca**
+**Gestión de biblioteca** (personal)
 - 📗 **Ejemplares**: registro de copias físicas por título, con estado (disponible /
   prestado / dado de baja).
 - 🧑‍🤝‍🧑 **Socios**: alta con validación de email/documento únicos y estado (activo /
-  suspendido).
+  suspendido). El personal crea al socio junto con su acceso al portal.
+
+**Portal del cliente** (rol `CLIENTE`)
+- 🔖 **Reservar títulos** desde el catálogo; el bibliotecario cumple la reserva
+  prestando un ejemplar.
+- 📖 **"Mis préstamos" y "Mis reservas"**: el socio ve y gestiona solo lo suyo
+  (autorización a nivel de fila).
 - 🔁 **Préstamos y devoluciones** con reglas de negocio: solo se presta un ejemplar
   disponible, a un socio activo y sin préstamos vencidos; la devolución libera el
   ejemplar. Listado de préstamos vencidos.
 
 **Ingeniería**
-- 🔐 **Autenticación JWT** con Spring Security y roles (`ADMIN` / `LIBRARIAN`):
-  catálogo de lectura pública, operación de biblioteca autenticada, y gestión de
-  usuarios exclusiva del ADMIN. La separación de roles es de punta a punta: el
-  frontend lee el rol del token y muestra la sección "Usuarios" solo al admin.
+- 🔐 **Autenticación JWT** con Spring Security y tres roles (`ADMIN` / `LIBRARIAN` /
+  `CLIENTE`): catálogo de lectura pública, operación de biblioteca solo para el
+  personal, gestión de usuarios exclusiva del ADMIN, y un portal donde cada socio
+  ve solo lo suyo (**autorización a nivel de fila**). La separación de roles es de
+  punta a punta: el frontend lee el rol del token y adapta el menú y las pantallas.
   Contraseñas con BCrypt.
 - 📖 **Documentación OpenAPI / Swagger UI** autogenerada, con soporte de Bearer token.
 - 🛡️ **Manejo de errores** consistente con `ProblemDetail` (RFC 7807); `409` para
@@ -134,19 +143,30 @@ Base URL: `/api`
 | `GET`  | `/api/authors` | Lista paginada de autores |
 | `GET`  | `/api/authors/alive?year={año}` | Autores vivos hasta ese año |
 
-**Biblioteca** (todo requiere JWT)
+**Biblioteca** (solo personal — 🔒 requiere rol `LIBRARIAN`/`ADMIN`)
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
 | `POST` | `/api/copies` | Registra un ejemplar físico de un título |
 | `GET`  | `/api/copies?status={estado}` | Lista ejemplares, filtrable por estado |
-| `POST` | `/api/members` | Da de alta un socio |
+| `POST` | `/api/members` | Da de alta un socio + su acceso (`{...,username,password}`) |
 | `GET`  | `/api/members` | Lista paginada de socios |
 | `PATCH`| `/api/members/{id}/status?status={estado}` | Activa o suspende un socio |
 | `POST` | `/api/loans` | Registra un préstamo (`{copyId, memberId}`) |
 | `POST` | `/api/loans/{id}/return` | Registra la devolución |
 | `GET`  | `/api/loans?status=&memberId=` | Lista préstamos (por estado o socio) |
 | `GET`  | `/api/loans/overdue` | Lista préstamos vencidos |
+| `GET`  | `/api/reservations` | Lista reservas pendientes |
+| `POST` | `/api/reservations/{id}/fulfill?copyId=` | Cumple una reserva prestando un ejemplar |
+
+**Portal del cliente** (🔒 requiere rol `CLIENTE`)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `GET`  | `/api/loans/mine` | Préstamos del socio autenticado |
+| `POST` | `/api/reservations` | Reserva un título (`{bookId}`) |
+| `GET`  | `/api/reservations/mine` | Reservas del socio autenticado |
+| `POST` | `/api/reservations/{id}/cancel` | Cancela una reserva propia |
 
 Health check público: `GET /actuator/health`.
 

@@ -25,6 +25,8 @@ export function AuthProvider({ children }) {
       authenticated,
       role,
       isAdmin: role === 'ADMIN',
+      isStaff: role === 'ADMIN' || role === 'LIBRARIAN',
+      isClient: role === 'CLIENTE',
       async login(username, password) {
         const { token } = await authApi.login(username, password);
         setToken(token);

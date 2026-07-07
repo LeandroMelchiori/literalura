@@ -46,9 +46,25 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
-                        // El catálogo es de lectura pública; operarlo requiere estar autenticado.
+                        // El catálogo es de lectura pública.
                         .requestMatchers(HttpMethod.GET, "/api/books/**", "/api/authors/**").permitAll()
+
+                        // Gestión de usuarios: solo ADMIN.
                         .requestMatchers("/api/auth/users/**").hasRole("ADMIN")
+
+                        // Portal del cliente: cada socio ve y gestiona lo suyo.
+                        .requestMatchers(HttpMethod.GET, "/api/loans/mine").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.GET, "/api/reservations/mine").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.POST, "/api/reservations").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.POST, "/api/reservations/*/cancel").hasRole("CLIENTE")
+
+                        // Operación de la biblioteca: solo personal (bibliotecario o admin).
+                        .requestMatchers(HttpMethod.POST, "/api/books/search").hasAnyRole("LIBRARIAN", "ADMIN")
+                        .requestMatchers("/api/copies/**", "/api/members/**").hasAnyRole("LIBRARIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/reservations").hasAnyRole("LIBRARIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/reservations/*/fulfill").hasAnyRole("LIBRARIAN", "ADMIN")
+                        .requestMatchers("/api/loans/**").hasAnyRole("LIBRARIAN", "ADMIN")
+
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, e) ->
