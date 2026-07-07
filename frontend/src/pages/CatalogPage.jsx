@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import * as catalog from '../api/catalog';
+import * as reservationsApi from '../api/reservations';
 import { DataState } from '../components/DataState';
 import { FormField } from '../components/FormField';
 import { Pagination } from '../components/Pagination';
@@ -78,10 +79,21 @@ function CatalogForm({ onCataloged }) {
 }
 
 export function CatalogPage() {
-  const { authenticated } = useAuth();
+  const { isStaff, isClient } = useAuth();
   const { data, loading, error, page, setPage, reload } = usePagedData(
     (p) => catalog.listBooks(p),
   );
+  const [reserveFeedback, setReserveFeedback] = useState(null);
+
+  async function reservar(book) {
+    setReserveFeedback(null);
+    try {
+      await reservationsApi.reserve(book.id);
+      setReserveFeedback({ ok: true, text: `Reservaste «${book.title}».` });
+    } catch (err) {
+      setReserveFeedback({ ok: false, text: err.message });
+    }
+  }
 
   return (
     <section>
@@ -90,7 +102,13 @@ export function CatalogPage() {
         <StatsBar />
       </header>
 
-      {authenticated && <CatalogForm onCataloged={reload} />}
+      {isStaff && <CatalogForm onCataloged={reload} />}
+
+      {reserveFeedback && (
+        <p className={reserveFeedback.ok ? 'form-ok' : 'form-error'} role="status">
+          {reserveFeedback.text}
+        </p>
+      )}
 
       <DataState
         loading={loading}
@@ -108,6 +126,11 @@ export function CatalogPage() {
                 <th>Autor</th>
                 <th>Idioma</th>
                 <th>Descargas</th>
+                {isClient && (
+                  <th>
+                    <span className="visually-hidden">Acciones</span>
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -118,6 +141,17 @@ export function CatalogPage() {
                   <td>{book.author.name}</td>
                   <td>{book.languages.join(', ')}</td>
                   <td>{book.downloadCount.toLocaleString('es')}</td>
+                  {isClient && (
+                    <td>
+                      <button
+                        type="button"
+                        className="btn btn--secondary btn--small"
+                        onClick={() => reservar(book)}
+                      >
+                        Reservar
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

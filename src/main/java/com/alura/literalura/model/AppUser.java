@@ -23,13 +23,23 @@ public class AppUser {
     @Column(nullable = false)
     private UserRole role;
 
+    // Solo los usuarios CLIENTE apuntan a un socio; el personal lo deja en null.
+    @OneToOne
+    @JoinColumn(name = "member_id", unique = true)
+    private Member member;
+
     protected AppUser() {
     }
 
     public AppUser(String username, String password, UserRole role) {
+        this(username, password, role, null);
+    }
+
+    public AppUser(String username, String password, UserRole role, Member member) {
         this.username = username;
         this.password = password;
         this.role = role;
+        this.member = member;
     }
 
     public Long getId() {
@@ -46,5 +56,9 @@ public class AppUser {
 
     public UserRole getRole() {
         return role;
+    }
+
+    public Member getMember() {
+        return member;
     }
 }

@@ -9,12 +9,14 @@ function fakeJwt(payload) {
 }
 
 function Probe() {
-  const { authenticated, role, isAdmin } = useAuth();
+  const { authenticated, role, isAdmin, isStaff, isClient } = useAuth();
   return (
     <div>
       <span data-testid="auth">{String(authenticated)}</span>
       <span data-testid="role">{role ?? 'none'}</span>
       <span data-testid="admin">{String(isAdmin)}</span>
+      <span data-testid="staff">{String(isStaff)}</span>
+      <span data-testid="client">{String(isClient)}</span>
     </div>
   );
 }
@@ -44,7 +46,7 @@ describe('AuthContext', () => {
     expect(screen.getByTestId('admin')).toHaveTextContent('true');
   });
 
-  it('un LIBRARIAN no es admin', () => {
+  it('un LIBRARIAN es staff pero no admin ni cliente', () => {
     localStorage.setItem('literalura.token', fakeJwt({ sub: 'demo', role: 'LIBRARIAN' }));
     render(
       <AuthProvider>
@@ -53,5 +55,18 @@ describe('AuthContext', () => {
     );
     expect(screen.getByTestId('role')).toHaveTextContent('LIBRARIAN');
     expect(screen.getByTestId('admin')).toHaveTextContent('false');
+    expect(screen.getByTestId('staff')).toHaveTextContent('true');
+    expect(screen.getByTestId('client')).toHaveTextContent('false');
+  });
+
+  it('un CLIENTE es cliente y no staff', () => {
+    localStorage.setItem('literalura.token', fakeJwt({ sub: 'ana', role: 'CLIENTE' }));
+    render(
+      <AuthProvider>
+        <Probe />
+      </AuthProvider>,
+    );
+    expect(screen.getByTestId('client')).toHaveTextContent('true');
+    expect(screen.getByTestId('staff')).toHaveTextContent('false');
   });
 });
