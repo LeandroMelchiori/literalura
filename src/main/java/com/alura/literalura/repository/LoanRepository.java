@@ -16,6 +16,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 
     Page<Loan> findByMemberId(Long memberId, Pageable pageable);
 
+    long countByMemberIdAndStatus(Long memberId, LoanStatus status);
+
     // Un socio con préstamos vencidos no puede pedir más; esta consulta lo detecta.
     @Query("""
             SELECT COUNT(l) > 0 FROM Loan l

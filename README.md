@@ -50,15 +50,19 @@ centralizado, migraciones versionadas, tests automatizados, Docker y CI.
   prestado / dado de baja).
 - 🧑‍🤝‍🧑 **Socios**: alta con validación de email/documento únicos y estado (activo /
   suspendido). El personal crea al socio junto con su acceso al portal.
+- 🔁 **Préstamos y devoluciones** con reglas de negocio: solo se presta un ejemplar
+  disponible, a un socio activo, sin préstamos vencidos ni multas impagas y con un
+  **máximo de 3 préstamos activos**. Listado de vencidos.
+- 💸 **Multas por retraso**: la devolución fuera de plazo genera una multa
+  ($50/día); el personal registra el pago. Un socio con multa impaga no puede pedir.
 
 **Portal del cliente** (rol `CLIENTE`)
 - 🔖 **Reservar títulos** desde el catálogo; el bibliotecario cumple la reserva
   prestando un ejemplar.
-- 📖 **"Mis préstamos" y "Mis reservas"**: el socio ve y gestiona solo lo suyo
-  (autorización a nivel de fila).
-- 🔁 **Préstamos y devoluciones** con reglas de negocio: solo se presta un ejemplar
-  disponible, a un socio activo y sin préstamos vencidos; la devolución libera el
-  ejemplar. Listado de préstamos vencidos.
+- 🔄 **Renovar préstamos**: el socio extiende el plazo (hasta 2 veces) si el préstamo
+  no está vencido y nadie reservó ese título.
+- 📖 **"Mis préstamos", "Mis reservas" y "Mis multas"**: el socio ve y gestiona solo
+  lo suyo (**autorización a nivel de fila**).
 
 **Ingeniería**
 - 🔐 **Autenticación JWT** con Spring Security y tres roles (`ADMIN` / `LIBRARIAN` /
@@ -158,15 +162,19 @@ Base URL: `/api`
 | `GET`  | `/api/loans/overdue` | Lista préstamos vencidos |
 | `GET`  | `/api/reservations` | Lista reservas pendientes |
 | `POST` | `/api/reservations/{id}/fulfill?copyId=` | Cumple una reserva prestando un ejemplar |
+| `GET`  | `/api/fines` | Lista las multas impagas |
+| `POST` | `/api/fines/{id}/pay` | Registra el pago de una multa |
 
 **Portal del cliente** (🔒 requiere rol `CLIENTE`)
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
 | `GET`  | `/api/loans/mine` | Préstamos del socio autenticado |
+| `POST` | `/api/loans/{id}/renew` | Renueva un préstamo propio |
 | `POST` | `/api/reservations` | Reserva un título (`{bookId}`) |
 | `GET`  | `/api/reservations/mine` | Reservas del socio autenticado |
 | `POST` | `/api/reservations/{id}/cancel` | Cancela una reserva propia |
+| `GET`  | `/api/fines/mine` | Multas del socio autenticado |
 
 Health check público: `GET /actuator/health`.
 

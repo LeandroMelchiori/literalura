@@ -2,9 +2,11 @@ import { BrowserRouter, Navigate, NavLink, Route, Routes, useLocation } from 're
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CatalogPage } from './pages/CatalogPage';
 import { CopiesPage } from './pages/CopiesPage';
+import { FinesPage } from './pages/FinesPage';
 import { LoansPage } from './pages/LoansPage';
 import { LoginPage } from './pages/LoginPage';
 import { MembersPage } from './pages/MembersPage';
+import { MyFinesPage } from './pages/MyFinesPage';
 import { MyLoansPage } from './pages/MyLoansPage';
 import { MyReservationsPage } from './pages/MyReservationsPage';
 import { ReservationsPage } from './pages/ReservationsPage';
@@ -43,6 +45,7 @@ function Header() {
               <NavLink to="/members">Socios</NavLink>
               <NavLink to="/loans">Préstamos</NavLink>
               <NavLink to="/reservations">Reservas</NavLink>
+              <NavLink to="/fines">Multas</NavLink>
               {isAdmin && <NavLink to="/users">Usuarios</NavLink>}
             </>
           )}
@@ -50,6 +53,7 @@ function Header() {
             <>
               <NavLink to="/my-loans">Mis préstamos</NavLink>
               <NavLink to="/my-reservations">Mis reservas</NavLink>
+              <NavLink to="/my-fines">Mis multas</NavLink>
             </>
           )}
         </nav>
@@ -85,11 +89,13 @@ export function App() {
             <Route path="/members" element={<RequireAuth allow={STAFF}><MembersPage /></RequireAuth>} />
             <Route path="/loans" element={<RequireAuth allow={STAFF}><LoansPage /></RequireAuth>} />
             <Route path="/reservations" element={<RequireAuth allow={STAFF}><ReservationsPage /></RequireAuth>} />
+            <Route path="/fines" element={<RequireAuth allow={STAFF}><FinesPage /></RequireAuth>} />
             <Route path="/users" element={<RequireAuth allow={['ADMIN']}><UsersPage /></RequireAuth>} />
 
             {/* Cliente */}
             <Route path="/my-loans" element={<RequireAuth allow={['CLIENTE']}><MyLoansPage /></RequireAuth>} />
             <Route path="/my-reservations" element={<RequireAuth allow={['CLIENTE']}><MyReservationsPage /></RequireAuth>} />
+            <Route path="/my-fines" element={<RequireAuth allow={['CLIENTE']}><MyFinesPage /></RequireAuth>} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

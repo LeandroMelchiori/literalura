@@ -15,5 +15,6 @@ public record LoanDTO(
         LocalDate dueDate,
         LocalDate returnDate,
         LoanStatus status,
-        boolean overdue) {
+        boolean overdue,
+        int renewals) {
 }

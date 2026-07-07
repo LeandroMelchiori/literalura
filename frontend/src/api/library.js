@@ -34,6 +34,10 @@ export function listMyLoans(page = 0, size = 10) {
   return request(`/api/loans/mine?page=${page}&size=${size}`);
 }
 
+export function renewLoan(loanId) {
+  return request(`/api/loans/${loanId}/renew`, { method: 'POST' });
+}
+
 export function listOverdueLoans() {
   return request('/api/loans/overdue');
 }
