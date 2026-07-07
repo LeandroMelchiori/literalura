@@ -36,7 +36,7 @@ class LoanControllerTest {
     private LoanDTO sampleLoan() {
         return new LoanDTO(1L, 10L, "A-001", "Pride and Prejudice",
                 2L, "Ana Díaz", LocalDate.now(), LocalDate.now().plusDays(14),
-                null, LoanStatus.ACTIVE, false);
+                null, LoanStatus.ACTIVE, false, 0);
     }
 
     @Test

@@ -54,15 +54,19 @@ public class SecurityConfig {
 
                         // Portal del cliente: cada socio ve y gestiona lo suyo.
                         .requestMatchers(HttpMethod.GET, "/api/loans/mine").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.POST, "/api/loans/*/renew").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.GET, "/api/reservations/mine").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.POST, "/api/reservations").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.POST, "/api/reservations/*/cancel").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.GET, "/api/fines/mine").hasRole("CLIENTE")
 
                         // Operación de la biblioteca: solo personal (bibliotecario o admin).
                         .requestMatchers(HttpMethod.POST, "/api/books/search").hasAnyRole("LIBRARIAN", "ADMIN")
                         .requestMatchers("/api/copies/**", "/api/members/**").hasAnyRole("LIBRARIAN", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/reservations").hasAnyRole("LIBRARIAN", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/reservations/*/fulfill").hasAnyRole("LIBRARIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/fines").hasAnyRole("LIBRARIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/fines/*/pay").hasAnyRole("LIBRARIAN", "ADMIN")
                         .requestMatchers("/api/loans/**").hasAnyRole("LIBRARIAN", "ADMIN")
 
                         .anyRequest().authenticated())

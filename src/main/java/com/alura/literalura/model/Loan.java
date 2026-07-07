@@ -34,6 +34,9 @@ public class Loan {
     @Column(nullable = false)
     private LoanStatus status = LoanStatus.ACTIVE;
 
+    @Column(nullable = false)
+    private int renewals = 0;
+
     protected Loan() {
     }
 
@@ -53,6 +56,19 @@ public class Loan {
     public void registrarDevolucion(LocalDate returnDate) {
         this.returnDate = returnDate;
         this.status = LoanStatus.RETURNED;
+    }
+
+    /** Extiende el plazo y cuenta la renovación. */
+    public void renovar(LocalDate nuevaFecha) {
+        this.dueDate = nuevaFecha;
+        this.renewals++;
+    }
+
+    /** Días de atraso a una fecha dada (0 si no hay atraso). */
+    public long daysLate(LocalDate reference) {
+        return dueDate.isBefore(reference)
+                ? java.time.temporal.ChronoUnit.DAYS.between(dueDate, reference)
+                : 0;
     }
 
     public Long getId() {
@@ -81,5 +97,9 @@ public class Loan {
 
     public LoanStatus getStatus() {
         return status;
+    }
+
+    public int getRenewals() {
+        return renewals;
     }
 }

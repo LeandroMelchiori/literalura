@@ -69,4 +69,11 @@ public class LoanController {
                                       @PageableDefault(size = 20) Pageable pageable) {
         return loanService.obtenerPrestamosPorSocio(currentUser.currentMember(auth).getId(), pageable);
     }
+
+    @Operation(summary = "El socio renueva un préstamo propio",
+            security = @SecurityRequirement(name = "bearerAuth"))
+    @PostMapping("/{id}/renew")
+    public LoanDTO renovar(@PathVariable Long id, Authentication auth) {
+        return loanService.renovar(id, currentUser.currentMember(auth));
+    }
 }
