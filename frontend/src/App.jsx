@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 import { CatalogPage } from './pages/CatalogPage';
 import { CopiesPage } from './pages/CopiesPage';
 import { FinesPage } from './pages/FinesPage';
@@ -77,7 +78,8 @@ function Header() {
 export function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
         <Header />
         <main className="main">
           <Routes>
@@ -100,7 +102,8 @@ export function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
-      </BrowserRouter>
+        </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   );
 }

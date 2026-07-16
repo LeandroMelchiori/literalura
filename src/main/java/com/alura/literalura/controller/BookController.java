@@ -34,10 +34,11 @@ public class BookController {
                 .body(bookService.buscarYRegistrarLibro(title));
     }
 
-    @Operation(summary = "Lista de forma paginada los libros registrados")
+    @Operation(summary = "Lista de forma paginada los libros registrados, con búsqueda por título")
     @GetMapping
-    public Page<BookDTO> listarTodos(@PageableDefault(size = 20) Pageable pageable) {
-        return bookService.obtenerTodosLosLibros(pageable);
+    public Page<BookDTO> listarTodos(@RequestParam(required = false) String search,
+                                     @PageableDefault(size = 20) Pageable pageable) {
+        return bookService.obtenerTodosLosLibros(search, pageable);
     }
 
     @Operation(summary = "Lista libros filtrados por idioma (código ISO, ej: 'en', 'es')")

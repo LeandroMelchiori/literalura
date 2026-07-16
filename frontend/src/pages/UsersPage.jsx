@@ -2,26 +2,26 @@ import { useCallback, useEffect, useState } from 'react';
 import * as authApi from '../api/auth';
 import { DataState } from '../components/DataState';
 import { FormField } from '../components/FormField';
+import { useToast } from '../context/ToastContext';
 
 function CreateUserForm({ onCreated }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('LIBRARIAN');
-  const [feedback, setFeedback] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const toast = useToast();
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setFeedback(null);
     setSubmitting(true);
     try {
       const user = await authApi.createUser({ username: username.trim(), password, role });
-      setFeedback({ ok: true, text: `Usuario «${user.username}» (${user.role}) creado.` });
+      toast(`Usuario «${user.username}» (${user.role}) creado.`);
       setUsername('');
       setPassword('');
       onCreated();
     } catch (err) {
-      setFeedback({ ok: false, text: err.message });
+      toast(err.message, 'danger');
     } finally {
       setSubmitting(false);
     }
@@ -51,11 +51,6 @@ function CreateUserForm({ onCreated }) {
           {submitting ? 'Creando…' : 'Crear'}
         </button>
       </div>
-      {feedback && (
-        <p className={feedback.ok ? 'form-ok' : 'form-error'} role="status">
-          {feedback.text}
-        </p>
-      )}
     </form>
   );
 }

@@ -1,9 +1,9 @@
 import { request } from './client';
 
 // Ejemplares
-export function listCopies(page = 0, size = 10, status = '') {
-  const filter = status ? `&status=${status}` : '';
-  return request(`/api/copies?page=${page}&size=${size}${filter}`);
+export function listCopies(page = 0, size = 10, status = '', bookId = '') {
+  const filters = `${status ? `&status=${status}` : ''}${bookId ? `&bookId=${bookId}` : ''}`;
+  return request(`/api/copies?page=${page}&size=${size}${filters}`);
 }
 
 export function registerCopy(bookId, inventoryCode) {
@@ -11,8 +11,9 @@ export function registerCopy(bookId, inventoryCode) {
 }
 
 // Socios
-export function listMembers(page = 0, size = 10) {
-  return request(`/api/members?page=${page}&size=${size}`);
+export function listMembers(page = 0, size = 10, search = '') {
+  const filter = search ? `&search=${encodeURIComponent(search)}` : '';
+  return request(`/api/members?page=${page}&size=${size}${filter}`);
 }
 
 export function registerMember(member) {

@@ -1,9 +1,10 @@
-import { useState } from 'react';
 import * as library from '../api/library';
 import { DataState } from '../components/DataState';
 import { Pagination } from '../components/Pagination';
 import { StatusBadge } from '../components/StatusBadge';
+import { useToast } from '../context/ToastContext';
 import { usePagedData } from '../hooks/usePagedData';
+import { dueLabel, formatDate } from '../utils/dates';
 
 const MAX_RENEWALS = 2;
 
@@ -11,17 +12,16 @@ export function MyLoansPage() {
   const { data, loading, error, page, setPage, reload } = usePagedData(
     (p) => library.listMyLoans(p),
   );
-  const [feedback, setFeedback] = useState(null);
+  const toast = useToast();
 
   async function renew(loan) {
-    setFeedback(null);
     try {
-      await library.renewLoan(loan.id);
-      setFeedback({ ok: true, text: `Renovaste «${loan.bookTitle}».` });
+      const updated = await library.renewLoan(loan.id);
+      toast(`Renovaste «${loan.bookTitle}»; ahora vence el ${formatDate(updated.dueDate)}.`);
       reload();
     } catch (err) {
       // Reglas: vencido, con reserva pendiente, o máximo de renovaciones.
-      setFeedback({ ok: false, text: err.message });
+      toast(err.message, 'danger');
     }
   }
 
@@ -30,12 +30,6 @@ export function MyLoansPage() {
       <header className="page-header">
         <h1>Mis préstamos</h1>
       </header>
-
-      {feedback && (
-        <p className={feedback.ok ? 'form-ok' : 'form-error'} role="status">
-          {feedback.text}
-        </p>
-      )}
 
       <DataState
         loading={loading}
@@ -62,8 +56,15 @@ export function MyLoansPage() {
               {data?.content.map((loan) => (
                 <tr key={loan.id}>
                   <td>{loan.bookTitle}</td>
-                  <td>{loan.loanDate}</td>
-                  <td>{loan.dueDate}</td>
+                  <td>{formatDate(loan.loanDate)}</td>
+                  <td>
+                    {formatDate(loan.dueDate)}
+                    {loan.status === 'ACTIVE' && (
+                      <div className={`muted due-hint ${loan.overdue ? 'due-hint--danger' : ''}`}>
+                        {dueLabel(loan.dueDate)}
+                      </div>
+                    )}
+                  </td>
                   <td>{loan.renewals} / {MAX_RENEWALS}</td>
                   <td>
                     <StatusBadge status={loan.status} overdue={loan.overdue} />

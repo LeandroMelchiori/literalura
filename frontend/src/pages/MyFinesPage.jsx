@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import * as fines from '../api/fines';
 import { DataState } from '../components/DataState';
+import { formatDate } from '../utils/dates';
 
 export function MyFinesPage() {
   const [items, setItems] = useState(null);
@@ -62,7 +63,7 @@ export function MyFinesPage() {
                   <td>{f.bookTitle}</td>
                   <td>{f.daysLate}</td>
                   <td>${Number(f.amount).toLocaleString('es')}</td>
-                  <td>{f.createdAt}</td>
+                  <td>{formatDate(f.createdAt)}</td>
                   <td>
                     <span className={`badge badge--${f.paid ? 'ok' : 'danger'}`}>
                       {f.paid ? 'Pagada' : 'Impaga'}

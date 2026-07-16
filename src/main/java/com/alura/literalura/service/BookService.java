@@ -10,7 +10,9 @@ import com.alura.literalura.exception.BookNotFoundException;
 import com.alura.literalura.exception.ExternalApiException;
 import com.alura.literalura.model.Author;
 import com.alura.literalura.model.Book;
+import com.alura.literalura.model.CopyStatus;
 import com.alura.literalura.repository.BookRepository;
+import com.alura.literalura.repository.CopyRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
@@ -26,28 +30,37 @@ public class BookService {
     private static final String GUTENDEX_URL = "https://gutendex.com/books/?search=";
 
     private final BookRepository repository;
+    private final CopyRepository copyRepository;
     private final AuthorService authorService;
     private final ConsumoAPI consumoAPI;
     private final ObjectMapper objectMapper;
 
     public BookService(BookRepository repository,
+                       CopyRepository copyRepository,
                        AuthorService authorService,
                        ConsumoAPI consumoAPI,
                        ObjectMapper objectMapper) {
         this.repository = repository;
+        this.copyRepository = copyRepository;
         this.authorService = authorService;
         this.consumoAPI = consumoAPI;
         this.objectMapper = objectMapper;
     }
 
     @Transactional(readOnly = true)
-    public Page<BookDTO> obtenerTodosLosLibros(Pageable pageable) {
-        return repository.findAllWithAuthor(pageable).map(this::toDto);
+    public Page<BookDTO> obtenerTodosLosLibros(String search, Pageable pageable) {
+        Page<Book> books = (search != null && !search.isBlank())
+                ? repository.searchByTitleWithAuthor(search.trim(), pageable)
+                : repository.findAllWithAuthor(pageable);
+        Map<Long, Long> disponibles = disponiblesPorLibro();
+        return books.map(b -> toDto(b, disponibles.getOrDefault(b.getId(), 0L)));
     }
 
     @Transactional(readOnly = true)
     public Page<BookDTO> obtenerLibrosPorIdioma(String idioma, Pageable pageable) {
-        return repository.findByLanguage(idioma, pageable).map(this::toDto);
+        Map<Long, Long> disponibles = disponiblesPorLibro();
+        return repository.findByLanguage(idioma, pageable)
+                .map(b -> toDto(b, disponibles.getOrDefault(b.getId(), 0L)));
     }
 
     @Transactional(readOnly = true)
@@ -80,7 +93,7 @@ public class BookService {
         BookDTO bookDTO = toBookDTO(response.results().get(0));
 
         return repository.findByTitle(bookDTO.title())
-                .map(this::toDto)
+                .map(this::toDtoConDisponibles)
                 .orElseGet(() -> {
                     Author author = authorService.guardarAutor(new Author(
                             bookDTO.author().name(),
@@ -88,7 +101,7 @@ public class BookService {
                             bookDTO.author().deathYear()));
                     Book book = toEntity(bookDTO);
                     book.setAuthor(author);
-                    return toDto(repository.save(book));
+                    return toDto(repository.save(book), 0);
                 });
     }
 
@@ -100,6 +113,11 @@ public class BookService {
         }
     }
 
+    private Map<Long, Long> disponiblesPorLibro() {
+        return copyRepository.countAvailableGroupedByBook().stream()
+                .collect(Collectors.toMap(r -> (Long) r[0], r -> (Long) r[1]));
+    }
+
     private BookDTO toBookDTO(GutendexBook book) {
         GutendexAuthor first = (book.authors() != null && !book.authors().isEmpty())
                 ? book.authors().get(0)
@@ -109,11 +127,15 @@ public class BookService {
                 : new AuthorDTO("Desconocido", null, null);
 
         int downloads = book.downloadCount() != null ? book.downloadCount() : 0;
-        // Sin id: es la representación de Gutendex previa a persistir.
-        return new BookDTO(null, book.title(), author, book.languages(), downloads);
+        // Sin id ni ejemplares: es la representación de Gutendex previa a persistir.
+        return new BookDTO(null, book.title(), author, book.languages(), downloads, 0);
     }
 
-    private BookDTO toDto(Book book) {
+    private BookDTO toDtoConDisponibles(Book book) {
+        return toDto(book, copyRepository.countByBookIdAndStatus(book.getId(), CopyStatus.AVAILABLE));
+    }
+
+    private BookDTO toDto(Book book, long availableCopies) {
         Author author = book.getAuthor();
         AuthorDTO authorDTO = new AuthorDTO(
                 author.getName(),
@@ -124,7 +146,8 @@ public class BookService {
                 book.getTitle(),
                 authorDTO,
                 List.of(book.getLanguage()),
-                book.getDownloadCount());
+                book.getDownloadCount(),
+                availableCopies);
     }
 
     private Book toEntity(BookDTO bookDTO) {

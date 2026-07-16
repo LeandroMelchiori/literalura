@@ -20,4 +20,15 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query(value = "SELECT b FROM Book b JOIN FETCH b.author WHERE b.language = :language",
             countQuery = "SELECT COUNT(b) FROM Book b WHERE b.language = :language")
     Page<Book> findByLanguage(String language, Pageable pageable);
+
+    // Búsqueda local del catálogo ya registrado (no confundir con la búsqueda en Gutendex).
+    @Query(value = """
+            SELECT b FROM Book b JOIN FETCH b.author
+            WHERE LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%'))
+            """,
+            countQuery = """
+            SELECT COUNT(b) FROM Book b
+            WHERE LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%'))
+            """)
+    Page<Book> searchByTitleWithAuthor(String title, Pageable pageable);
 }

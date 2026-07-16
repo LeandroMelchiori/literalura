@@ -6,6 +6,7 @@ import com.alura.literalura.exception.BookNotFoundException;
 import com.alura.literalura.model.Author;
 import com.alura.literalura.model.Book;
 import com.alura.literalura.repository.BookRepository;
+import com.alura.literalura.repository.CopyRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,8 @@ class BookServiceTest {
 
     @Mock
     private BookRepository repository;
+    @Mock
+    private CopyRepository copyRepository;
     @Mock
     private AuthorService authorService;
     @Mock

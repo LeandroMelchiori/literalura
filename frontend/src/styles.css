@@ -388,6 +388,170 @@ tbody tr:hover {
   font-size: 0.9rem;
 }
 
+/* ===== Toasts ===== */
+.toasts {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 100;
+  max-width: min(24rem, calc(100vw - 2rem));
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--ok-fg);
+  box-shadow: 0 4px 16px rgba(31, 39, 51, 0.15);
+  font-size: 0.9rem;
+  animation: toast-in 0.2s ease-out;
+}
+
+.toast--danger {
+  border-left-color: var(--danger-fg);
+}
+
+.toast__close {
+  margin-left: auto;
+  border: none;
+  background: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateY(0.5rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ===== Skeleton de carga ===== */
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeleton__bar {
+  height: 1.1rem;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--muted-bg) 25%, var(--border) 50%, var(--muted-bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+.skeleton__bar:nth-child(2) {
+  width: 85%;
+}
+
+.skeleton__bar:nth-child(3) {
+  width: 70%;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ===== Diálogo de confirmación ===== */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 39, 51, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 90;
+  padding: 1rem;
+}
+
+.dialog {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  max-width: 26rem;
+  width: 100%;
+  box-shadow: 0 12px 40px rgba(31, 39, 51, 0.25);
+}
+
+.dialog h2 {
+  margin-bottom: 0.5rem;
+}
+
+.dialog p {
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+}
+
+.dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+/* ===== Resumen del socio ===== */
+.summary {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.summary__item {
+  text-decoration: none;
+  color: var(--text);
+  background: var(--muted-bg);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.summary__item:hover {
+  filter: brightness(0.96);
+}
+
+.summary__item--warn {
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+}
+
+.summary__item--danger {
+  background: var(--danger-bg);
+  color: var(--danger-fg);
+}
+
+/* ===== Detalles ===== */
+.due-hint {
+  font-size: 0.78rem;
+}
+
+.due-hint--danger {
+  color: var(--danger-fg);
+}
+
+.catalog-search {
+  margin-bottom: 1rem;
+}
+
+.catalog-search input {
+  min-width: 16rem;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 40rem) {
   .header__inner {

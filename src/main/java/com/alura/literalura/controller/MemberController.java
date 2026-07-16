@@ -32,10 +32,11 @@ public class MemberController {
                 .body(memberService.registrarSocio(request));
     }
 
-    @Operation(summary = "Lista paginada de socios")
+    @Operation(summary = "Lista paginada de socios, con búsqueda por nombre")
     @GetMapping
-    public Page<MemberDTO> listar(@PageableDefault(size = 20) Pageable pageable) {
-        return memberService.obtenerSocios(pageable);
+    public Page<MemberDTO> listar(@RequestParam(required = false) String search,
+                                  @PageableDefault(size = 20) Pageable pageable) {
+        return memberService.obtenerSocios(search, pageable);
     }
 
     @Operation(summary = "Obtiene un socio por id")
