@@ -1,7 +1,8 @@
 import { request } from './client';
 
-export function listBooks(page = 0, size = 10) {
-  return request(`/api/books?page=${page}&size=${size}`, { auth: false });
+export function listBooks(page = 0, size = 10, search = '') {
+  const filter = search ? `&search=${encodeURIComponent(search)}` : '';
+  return request(`/api/books?page=${page}&size=${size}${filter}`, { auth: false });
 }
 
 export function getStats() {

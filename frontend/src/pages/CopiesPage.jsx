@@ -1,29 +1,35 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import * as catalog from '../api/catalog';
 import * as library from '../api/library';
 import { DataState } from '../components/DataState';
 import { FormField } from '../components/FormField';
 import { Pagination } from '../components/Pagination';
 import { StatusBadge } from '../components/StatusBadge';
+import { useToast } from '../context/ToastContext';
 import { usePagedData } from '../hooks/usePagedData';
 
 function RegisterCopyForm({ onRegistered }) {
+  const [books, setBooks] = useState([]);
   const [bookId, setBookId] = useState('');
   const [inventoryCode, setInventoryCode] = useState('');
-  const [feedback, setFeedback] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const toast = useToast();
+
+  useEffect(() => {
+    catalog.listBooks(0, 100).then((p) => setBooks(p.content)).catch(() => {});
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setFeedback(null);
     setSubmitting(true);
     try {
       const copy = await library.registerCopy(Number(bookId), inventoryCode.trim());
-      setFeedback({ ok: true, text: `Ejemplar ${copy.inventoryCode} registrado para «${copy.bookTitle}».` });
+      toast(`Ejemplar ${copy.inventoryCode} registrado para «${copy.bookTitle}».`);
       setBookId('');
       setInventoryCode('');
       onRegistered();
     } catch (err) {
-      setFeedback({ ok: false, text: err.message });
+      toast(err.message, 'danger');
     } finally {
       setSubmitting(false);
     }
@@ -33,14 +39,17 @@ function RegisterCopyForm({ onRegistered }) {
     <form className="card form-inline" onSubmit={handleSubmit}>
       <h2>Registrar ejemplar</h2>
       <div className="form-inline__row">
-        <FormField
-          id="copy-book-id"
-          label="ID del título (ver Catálogo)"
-          type="number"
-          min="1"
-          value={bookId}
-          onChange={setBookId}
-        />
+        <div className="field">
+          <label htmlFor="copy-book">Título del catálogo</label>
+          <select id="copy-book" value={bookId} onChange={(e) => setBookId(e.target.value)} required>
+            <option value="">Elegir título…</option>
+            {books.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.title} — {b.author.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <FormField
           id="copy-code"
           label="Código de inventario"
@@ -52,11 +61,6 @@ function RegisterCopyForm({ onRegistered }) {
           {submitting ? 'Registrando…' : 'Registrar'}
         </button>
       </div>
-      {feedback && (
-        <p className={feedback.ok ? 'form-ok' : 'form-error'} role="status">
-          {feedback.text}
-        </p>
-      )}
     </form>
   );
 }

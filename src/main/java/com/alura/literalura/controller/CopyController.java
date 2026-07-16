@@ -32,11 +32,12 @@ public class CopyController {
                 .body(copyService.registrarEjemplar(request));
     }
 
-    @Operation(summary = "Lista ejemplares, opcionalmente filtrados por estado")
+    @Operation(summary = "Lista ejemplares, opcionalmente filtrados por estado y/o título")
     @GetMapping
     public Page<CopyDTO> listar(@RequestParam(required = false) CopyStatus status,
+                                @RequestParam(required = false) Long bookId,
                                 @PageableDefault(size = 20) Pageable pageable) {
-        return copyService.obtenerEjemplares(status, pageable);
+        return copyService.obtenerEjemplares(status, bookId, pageable);
     }
 
     @Operation(summary = "Obtiene un ejemplar por id")

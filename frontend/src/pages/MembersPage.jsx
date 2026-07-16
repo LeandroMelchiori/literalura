@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import * as library from '../api/library';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { DataState } from '../components/DataState';
 import { FormField } from '../components/FormField';
 import { Pagination } from '../components/Pagination';
 import { StatusBadge } from '../components/StatusBadge';
+import { useToast } from '../context/ToastContext';
 import { usePagedData } from '../hooks/usePagedData';
 
 function RegisterMemberForm({ onRegistered }) {
@@ -12,12 +14,11 @@ function RegisterMemberForm({ onRegistered }) {
   const [documentId, setDocumentId] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [feedback, setFeedback] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const toast = useToast();
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setFeedback(null);
     setSubmitting(true);
     try {
       const member = await library.registerMember({
@@ -27,7 +28,7 @@ function RegisterMemberForm({ onRegistered }) {
         username: username.trim(),
         password,
       });
-      setFeedback({ ok: true, text: `Socio «${member.name}» dado de alta con acceso al portal.` });
+      toast(`Socio «${member.name}» dado de alta con acceso al portal.`);
       setName('');
       setEmail('');
       setDocumentId('');
@@ -35,7 +36,7 @@ function RegisterMemberForm({ onRegistered }) {
       setPassword('');
       onRegistered();
     } catch (err) {
-      setFeedback({ ok: false, text: err.message });
+      toast(err.message, 'danger');
     } finally {
       setSubmitting(false);
     }
@@ -67,29 +68,35 @@ function RegisterMemberForm({ onRegistered }) {
           {submitting ? 'Guardando…' : 'Dar de alta'}
         </button>
       </div>
-      {feedback && (
-        <p className={feedback.ok ? 'form-ok' : 'form-error'} role="status">
-          {feedback.text}
-        </p>
-      )}
     </form>
   );
 }
 
 export function MembersPage() {
+  const [search, setSearch] = useState('');
   const { data, loading, error, page, setPage, reload } = usePagedData(
-    (p) => library.listMembers(p),
+    (p) => library.listMembers(p, 10, search),
+    [search],
   );
-  const [actionError, setActionError] = useState(null);
+  // Socio pendiente de confirmación de suspensión (null = diálogo cerrado).
+  const [toSuspend, setToSuspend] = useState(null);
+  const toast = useToast();
 
-  async function toggleStatus(member) {
-    setActionError(null);
-    const next = member.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+  async function changeStatus(member, next) {
     try {
       await library.changeMemberStatus(member.id, next);
+      toast(next === 'SUSPENDED' ? `Socio «${member.name}» suspendido.` : `Socio «${member.name}» reactivado.`);
       reload();
     } catch (err) {
-      setActionError(err);
+      toast(err.message, 'danger');
+    }
+  }
+
+  function handleToggle(member) {
+    if (member.status === 'ACTIVE') {
+      setToSuspend(member); // Suspender es sensible: pide confirmación.
+    } else {
+      changeStatus(member, 'ACTIVE');
     }
   }
 
@@ -97,21 +104,36 @@ export function MembersPage() {
     <section>
       <header className="page-header">
         <h1>Socios</h1>
+        <div className="field field--inline">
+          <label htmlFor="member-search">Buscar</label>
+          <input
+            id="member-search"
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Por nombre…"
+          />
+        </div>
       </header>
 
       <RegisterMemberForm onRegistered={reload} />
-
-      {actionError && (
-        <p className="form-error" role="alert">
-          {actionError.message}
-        </p>
-      )}
 
       <DataState
         loading={loading}
         error={error}
         empty={data?.content.length === 0}
-        emptyMessage="Todavía no hay socios registrados."
+        emptyMessage={search ? `No hay socios que coincidan con «${search}».` : 'Todavía no hay socios registrados.'}
+        emptyAction={
+          !search && (
+            <button
+              type="button"
+              className="btn"
+              onClick={() => document.getElementById('member-name')?.focus()}
+            >
+              Dar de alta al primero
+            </button>
+          )
+        }
         onRetry={reload}
       >
         <div className="table-wrap">
@@ -142,7 +164,7 @@ export function MembersPage() {
                     <button
                       type="button"
                       className="btn btn--secondary btn--small"
-                      onClick={() => toggleStatus(member)}
+                      onClick={() => handleToggle(member)}
                     >
                       {member.status === 'ACTIVE' ? 'Suspender' : 'Reactivar'}
                     </button>
@@ -154,6 +176,18 @@ export function MembersPage() {
         </div>
         <Pagination page={page} totalPages={data?.totalPages ?? 0} onChange={setPage} />
       </DataState>
+
+      <ConfirmDialog
+        open={toSuspend !== null}
+        title="Suspender socio"
+        message={`¿Suspender a «${toSuspend?.name}»? No podrá pedir préstamos ni reservar hasta que se lo reactive.`}
+        confirmLabel="Suspender"
+        onConfirm={() => {
+          changeStatus(toSuspend, 'SUSPENDED');
+          setToSuspend(null);
+        }}
+        onCancel={() => setToSuspend(null)}
+      />
     </section>
   );
 }

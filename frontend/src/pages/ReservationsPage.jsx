@@ -1,20 +1,29 @@
 import { useCallback, useEffect, useState } from 'react';
+import * as library from '../api/library';
 import * as reservations from '../api/reservations';
 import { DataState } from '../components/DataState';
+import { useToast } from '../context/ToastContext';
+import { formatDate } from '../utils/dates';
 
 export function ReservationsPage() {
   const [items, setItems] = useState(null);
+  const [availableCopies, setAvailableCopies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // Copia elegida por cada reserva para cumplirla (id de reserva -> código de ejemplar).
-  const [copyIds, setCopyIds] = useState({});
-  const [feedback, setFeedback] = useState(null);
+  // Ejemplar elegido por reserva (id de reserva -> id de ejemplar).
+  const [selection, setSelection] = useState({});
+  const toast = useToast();
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      setItems(await reservations.listPendingReservations());
+      const [pending, copies] = await Promise.all([
+        reservations.listPendingReservations(),
+        library.listCopies(0, 200, 'AVAILABLE'),
+      ]);
+      setItems(pending);
+      setAvailableCopies(copies.content);
     } catch (e) {
       setError(e);
     } finally {
@@ -27,18 +36,12 @@ export function ReservationsPage() {
   }, [load]);
 
   async function fulfill(reservation) {
-    setFeedback(null);
-    const copyId = copyIds[reservation.id];
-    if (!copyId) {
-      setFeedback({ ok: false, text: 'Indicá el ID del ejemplar a prestar.' });
-      return;
-    }
     try {
-      await reservations.fulfillReservation(reservation.id, Number(copyId));
-      setFeedback({ ok: true, text: `Reserva de «${reservation.bookTitle}» cumplida.` });
+      await reservations.fulfillReservation(reservation.id, Number(selection[reservation.id]));
+      toast(`Reserva de «${reservation.bookTitle}» cumplida: prestado a ${reservation.memberName}.`);
       load();
     } catch (e) {
-      setFeedback({ ok: false, text: e.message });
+      toast(e.message, 'danger');
     }
   }
 
@@ -47,12 +50,6 @@ export function ReservationsPage() {
       <header className="page-header">
         <h1>Reservas pendientes</h1>
       </header>
-
-      {feedback && (
-        <p className={feedback.ok ? 'form-ok' : 'form-error'} role="status">
-          {feedback.text}
-        </p>
-      )}
 
       <DataState
         loading={loading}
@@ -68,39 +65,54 @@ export function ReservationsPage() {
                 <th>Título</th>
                 <th>Socio</th>
                 <th>Fecha</th>
-                <th>ID ejemplar</th>
+                <th>Ejemplar a prestar</th>
                 <th>
                   <span className="visually-hidden">Acciones</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {items?.map((r) => (
-                <tr key={r.id}>
-                  <td>{r.bookTitle}</td>
-                  <td>{r.memberName}</td>
-                  <td>{r.reservationDate}</td>
-                  <td>
-                    <input
-                      type="number"
-                      min="1"
-                      aria-label={`ID del ejemplar para la reserva de ${r.bookTitle}`}
-                      value={copyIds[r.id] ?? ''}
-                      onChange={(e) => setCopyIds((prev) => ({ ...prev, [r.id]: e.target.value }))}
-                      style={{ width: '6rem' }}
-                    />
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn--small"
-                      onClick={() => fulfill(r)}
-                    >
-                      Prestar
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {items?.map((r) => {
+                // Solo los ejemplares disponibles del título reservado.
+                const options = availableCopies.filter((c) => c.bookId === r.bookId);
+                return (
+                  <tr key={r.id}>
+                    <td>{r.bookTitle}</td>
+                    <td>{r.memberName}</td>
+                    <td>{formatDate(r.reservationDate)}</td>
+                    <td>
+                      {options.length === 0 ? (
+                        <span className="muted">Sin ejemplares disponibles</span>
+                      ) : (
+                        <select
+                          aria-label={`Ejemplar para la reserva de ${r.bookTitle}`}
+                          value={selection[r.id] ?? ''}
+                          onChange={(e) =>
+                            setSelection((prev) => ({ ...prev, [r.id]: e.target.value }))
+                          }
+                        >
+                          <option value="">Elegir…</option>
+                          {options.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.inventoryCode}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="btn btn--small"
+                        disabled={!selection[r.id]}
+                        onClick={() => fulfill(r)}
+                      >
+                        Prestar
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -1,33 +1,54 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import * as library from '../api/library';
 import { DataState } from '../components/DataState';
-import { FormField } from '../components/FormField';
 import { Pagination } from '../components/Pagination';
 import { StatusBadge } from '../components/StatusBadge';
+import { useToast } from '../context/ToastContext';
 import { usePagedData } from '../hooks/usePagedData';
+import { formatDate } from '../utils/dates';
 
+/**
+ * Formulario de préstamo con selectores por nombre: nadie recuerda IDs.
+ * Select nativo: accesible por defecto y suficiente para el volumen de una
+ * demo; con catálogos grandes el paso siguiente sería un typeahead.
+ */
 function LendForm({ onLent }) {
-  const [copyId, setCopyId] = useState('');
+  const [members, setMembers] = useState([]);
+  const [copies, setCopies] = useState([]);
   const [memberId, setMemberId] = useState('');
-  const [feedback, setFeedback] = useState(null);
+  const [copyId, setCopyId] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const toast = useToast();
+
+  const loadOptions = useCallback(async () => {
+    try {
+      const [m, c] = await Promise.all([
+        library.listMembers(0, 100),
+        library.listCopies(0, 100, 'AVAILABLE'),
+      ]);
+      setMembers(m.content);
+      setCopies(c.content);
+    } catch {
+      // Si falla la carga de opciones, el submit igual mostrará el error.
+    }
+  }, []);
+
+  useEffect(() => {
+    loadOptions();
+  }, [loadOptions]);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setFeedback(null);
     setSubmitting(true);
     try {
       const loan = await library.lend(Number(copyId), Number(memberId));
-      setFeedback({
-        ok: true,
-        text: `«${loan.bookTitle}» prestado a ${loan.memberName}. Vence el ${loan.dueDate}.`,
-      });
+      toast(`«${loan.bookTitle}» prestado a ${loan.memberName}. Vence el ${formatDate(loan.dueDate)}.`);
       setCopyId('');
       setMemberId('');
+      loadOptions();
       onLent();
     } catch (err) {
-      // Acá llegan las reglas de negocio (409): ejemplar no disponible, socio suspendido, etc.
-      setFeedback({ ok: false, text: err.message });
+      toast(err.message, 'danger');
     } finally {
       setSubmitting(false);
     }
@@ -37,31 +58,32 @@ function LendForm({ onLent }) {
     <form className="card form-inline" onSubmit={handleSubmit}>
       <h2>Registrar préstamo</h2>
       <div className="form-inline__row">
-        <FormField
-          id="loan-copy"
-          label="ID del ejemplar"
-          type="number"
-          min="1"
-          value={copyId}
-          onChange={setCopyId}
-        />
-        <FormField
-          id="loan-member"
-          label="ID del socio"
-          type="number"
-          min="1"
-          value={memberId}
-          onChange={setMemberId}
-        />
+        <div className="field">
+          <label htmlFor="loan-copy">Ejemplar disponible</label>
+          <select id="loan-copy" value={copyId} onChange={(e) => setCopyId(e.target.value)} required>
+            <option value="">Elegir ejemplar…</option>
+            {copies.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.inventoryCode} — {c.bookTitle}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field">
+          <label htmlFor="loan-member">Socio</label>
+          <select id="loan-member" value={memberId} onChange={(e) => setMemberId(e.target.value)} required>
+            <option value="">Elegir socio…</option>
+            {members.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name} — {m.documentId}
+              </option>
+            ))}
+          </select>
+        </div>
         <button type="submit" className="btn" disabled={submitting || !copyId || !memberId}>
           {submitting ? 'Registrando…' : 'Prestar'}
         </button>
       </div>
-      {feedback && (
-        <p className={feedback.ok ? 'form-ok' : 'form-error'} role="status">
-          {feedback.text}
-        </p>
-      )}
     </form>
   );
 }
@@ -72,15 +94,15 @@ export function LoansPage() {
     (p) => library.listLoans(p, 10, status),
     [status],
   );
-  const [actionError, setActionError] = useState(null);
+  const toast = useToast();
 
   async function handleReturn(loan) {
-    setActionError(null);
     try {
       await library.returnLoan(loan.id);
+      toast(`«${loan.bookTitle}» devuelto.`);
       reload();
     } catch (err) {
-      setActionError(err);
+      toast(err.message, 'danger');
     }
   }
 
@@ -99,12 +121,6 @@ export function LoansPage() {
       </header>
 
       <LendForm onLent={reload} />
-
-      {actionError && (
-        <p className="form-error" role="alert">
-          {actionError.message}
-        </p>
-      )}
 
       <DataState
         loading={loading}
@@ -136,8 +152,8 @@ export function LoansPage() {
                   <td>{loan.bookTitle}</td>
                   <td>{loan.inventoryCode}</td>
                   <td>{loan.memberName}</td>
-                  <td>{loan.loanDate}</td>
-                  <td>{loan.dueDate}</td>
+                  <td>{formatDate(loan.loanDate)}</td>
+                  <td>{formatDate(loan.dueDate)}</td>
                   <td>
                     <StatusBadge status={loan.status} overdue={loan.overdue} />
                   </td>

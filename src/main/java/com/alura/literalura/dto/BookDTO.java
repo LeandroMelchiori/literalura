@@ -9,5 +9,6 @@ public record BookDTO(
         String title,
         AuthorDTO author,
         List<String> languages,
-        int downloadCount) {
+        int downloadCount,
+        long availableCopies) {
 }

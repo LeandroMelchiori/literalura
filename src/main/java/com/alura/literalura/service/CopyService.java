@@ -37,10 +37,17 @@ public class CopyService {
     }
 
     @Transactional(readOnly = true)
-    public Page<CopyDTO> obtenerEjemplares(CopyStatus status, Pageable pageable) {
-        Page<Copy> copies = (status != null)
-                ? repository.findByStatus(status, pageable)
-                : repository.findAll(pageable);
+    public Page<CopyDTO> obtenerEjemplares(CopyStatus status, Long bookId, Pageable pageable) {
+        Page<Copy> copies;
+        if (bookId != null && status != null) {
+            copies = repository.findByBookIdAndStatus(bookId, status, pageable);
+        } else if (bookId != null) {
+            copies = repository.findByBookId(bookId, pageable);
+        } else if (status != null) {
+            copies = repository.findByStatus(status, pageable);
+        } else {
+            copies = repository.findAll(pageable);
+        }
         return copies.map(this::toDto);
     }
 

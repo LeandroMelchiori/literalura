@@ -58,8 +58,11 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public Page<MemberDTO> obtenerSocios(Pageable pageable) {
-        return repository.findAll(pageable).map(this::toDto);
+    public Page<MemberDTO> obtenerSocios(String search, Pageable pageable) {
+        Page<Member> members = (search != null && !search.isBlank())
+                ? repository.findByNameContainingIgnoreCase(search.trim(), pageable)
+                : repository.findAll(pageable);
+        return members.map(this::toDto);
     }
 
     @Transactional(readOnly = true)

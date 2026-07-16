@@ -1,13 +1,17 @@
 /**
- * Unifica los tres estados de toda vista con datos: cargando, error y vacío.
- * Si hay datos, renderiza children.
+ * Unifica los tres estados de toda vista con datos: cargando (skeleton),
+ * error y vacío (con acción opcional). Si hay datos, renderiza children.
  */
-export function DataState({ loading, error, empty, emptyMessage, onRetry, children }) {
+export function DataState({ loading, error, empty, emptyMessage, emptyAction, onRetry, children }) {
   if (loading) {
     return (
       <div className="state" role="status" aria-live="polite">
-        <span className="spinner" aria-hidden="true" />
-        Cargando…
+        <span className="visually-hidden">Cargando…</span>
+        <div className="skeleton" aria-hidden="true">
+          <div className="skeleton__bar" />
+          <div className="skeleton__bar" />
+          <div className="skeleton__bar" />
+        </div>
       </div>
     );
   }
@@ -24,7 +28,12 @@ export function DataState({ loading, error, empty, emptyMessage, onRetry, childr
     );
   }
   if (empty) {
-    return <div className="state">{emptyMessage ?? 'No hay datos todavía.'}</div>;
+    return (
+      <div className="state">
+        <p>{emptyMessage ?? 'No hay datos todavía.'}</p>
+        {emptyAction}
+      </div>
+    );
   }
   return children;
 }

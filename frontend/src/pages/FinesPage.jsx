@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import * as fines from '../api/fines';
 import { DataState } from '../components/DataState';
+import { useToast } from '../context/ToastContext';
+import { formatDate } from '../utils/dates';
 
 export function FinesPage() {
   const [items, setItems] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [actionError, setActionError] = useState(null);
+  const toast = useToast();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -25,12 +27,12 @@ export function FinesPage() {
   }, [load]);
 
   async function pay(fine) {
-    setActionError(null);
     try {
       await fines.payFine(fine.id);
+      toast(`Pago de $${Number(fine.amount).toLocaleString('es')} de ${fine.memberName} registrado.`);
       load();
     } catch (e) {
-      setActionError(e);
+      toast(e.message, 'danger');
     }
   }
 
@@ -39,12 +41,6 @@ export function FinesPage() {
       <header className="page-header">
         <h1>Multas impagas</h1>
       </header>
-
-      {actionError && (
-        <p className="form-error" role="alert">
-          {actionError.message}
-        </p>
-      )}
 
       <DataState
         loading={loading}
@@ -74,7 +70,7 @@ export function FinesPage() {
                   <td>{f.bookTitle}</td>
                   <td>{f.daysLate}</td>
                   <td>${Number(f.amount).toLocaleString('es')}</td>
-                  <td>{f.createdAt}</td>
+                  <td>{formatDate(f.createdAt)}</td>
                   <td>
                     <button type="button" className="btn btn--small" onClick={() => pay(f)}>
                       Registrar pago
