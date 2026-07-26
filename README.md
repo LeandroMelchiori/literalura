@@ -1,271 +1,298 @@
-# 📚 LiteraLura API
+<div align="center">
+
+# 📚 LiteraLura
+
+### Sistema full stack de gestión de biblioteca
 
 [![CI](https://github.com/LeandroMelchiori/literalura/actions/workflows/ci.yml/badge.svg)](https://github.com/LeandroMelchiori/literalura/actions/workflows/ci.yml)
-![Java](https://img.shields.io/badge/Java-17-orange)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4-green)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4-6DB33F?logo=springboot&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=061A23)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
-**LiteraLura** es una **API REST** de gestión de biblioteca construida con Spring Boot.
-Cataloga títulos (importándolos del [Proyecto Gutenberg](https://gutenberg.org/) vía la
-API [Gutendex](https://gutendex.com/)), administra los **ejemplares físicos** de cada
-título, los **socios** de la biblioteca y el ciclo de **préstamos y devoluciones**, con
-sus reglas de negocio. Incluye documentación interactiva con Swagger, manejo de errores
-centralizado, migraciones versionadas, tests automatizados, Docker y CI.
+</div>
 
-> Originalmente un desafío de consola de Alura, reconvertido primero en una API REST
-> y luego en un sistema de gestión de biblioteca con un dominio real.
+LiteraLura nació como un desafío de consola para consultar libros del Proyecto Gutenberg y evolucionó hasta convertirse en un **sistema full stack de gestión bibliotecaria**.
+
+El proyecto combina una API REST desarrollada con Spring Boot y una SPA en React. Permite catalogar obras desde Gutendex, administrar ejemplares físicos, socios, préstamos, reservas y multas, con autenticación JWT y experiencias diferenciadas para administradores, bibliotecarios y socios.
 
 ---
 
-## 🌐 Demo en vivo
+## ✨ Funcionalidades
 
-<!-- Reemplazar con las URLs reales tras desplegar (ver docs/DEPLOY.md). -->
+### Catálogo público
 
-- **Aplicación:** _(pendiente — completar con la URL de Vercel)_
-- **API + Swagger:** _(pendiente — completar con la URL de Render + `/swagger-ui.html`)_
+- Consulta paginada de títulos y autores.
+- Búsqueda de títulos catalogados por texto.
+- Importación de libros desde la API pública de Gutendex.
+- Estadísticas agregadas del catálogo.
+- Consulta de autores vivos en un año determinado.
+- Visualización pública sin necesidad de iniciar sesión.
 
-**Usuario de demostración** (rol bibliotecario, para probar la operación completa):
+### Administración de la biblioteca
 
-| Usuario | Contraseña | Rol |
-|---------|-----------|-----|
-| `demo`  | `demo12345` | Bibliotecario |
+- Registro y gestión de ejemplares físicos mediante código de inventario.
+- Alta y actualización de socios.
+- Activación y suspensión de socios.
+- Registro de préstamos y devoluciones.
+- Detección de préstamos vencidos.
+- Gestión de reservas pendientes.
+- Registro y pago de multas.
+- Administración de usuarios internos.
 
-> El catálogo es de lectura pública. Con el usuario `demo` (bibliotecario) se
-> puede operar la biblioteca **y dar de alta socios con su acceso**; iniciando
-> sesión luego con ese socio se ve el **portal del cliente** (reservar títulos,
-> "mis préstamos", "mis reservas"). El plan gratuito de Render duerme el servicio
-> tras inactividad: la primera petición puede tardar unos segundos.
+### Portal del socio
 
----
+- Reserva de títulos desde el catálogo.
+- Consulta de préstamos propios.
+- Renovación de préstamos cuando las reglas de negocio lo permiten.
+- Consulta y cancelación de reservas propias.
+- Consulta de multas propias.
+- Resumen inicial con préstamos activos, vencimientos próximos y multas pendientes.
 
-## ✨ Características
+### Experiencia de usuario
 
-**Catálogo (Proyecto Gutenberg)**
-- 🔎 **Búsqueda e importación** de títulos por nombre desde Gutendex.
-- 📚 **Listado** de títulos con filtro por idioma y **estadísticas** de descargas.
-- 👤 **Consulta de autores**, incluyendo autores vivos en un año dado.
-
-**Gestión de biblioteca** (personal)
-- 📗 **Ejemplares**: registro de copias físicas por título, con estado (disponible /
-  prestado / dado de baja).
-- 🧑‍🤝‍🧑 **Socios**: alta con validación de email/documento únicos y estado (activo /
-  suspendido). El personal crea al socio junto con su acceso al portal.
-- 🔁 **Préstamos y devoluciones** con reglas de negocio: solo se presta un ejemplar
-  disponible, a un socio activo, sin préstamos vencidos ni multas impagas y con un
-  **máximo de 3 préstamos activos**. Listado de vencidos.
-- 💸 **Multas por retraso**: la devolución fuera de plazo genera una multa
-  ($50/día); el personal registra el pago. Un socio con multa impaga no puede pedir.
-
-**Portal del cliente** (rol `CLIENTE`)
-- 🔖 **Reservar títulos** desde el catálogo; el bibliotecario cumple la reserva
-  prestando un ejemplar.
-- 🔄 **Renovar préstamos**: el socio extiende el plazo (hasta 2 veces) si el préstamo
-  no está vencido y nadie reservó ese título.
-- 📖 **"Mis préstamos", "Mis reservas" y "Mis multas"**: el socio ve y gestiona solo
-  lo suyo (**autorización a nivel de fila**).
-
-**Ingeniería**
-- 🔐 **Autenticación JWT** con Spring Security y tres roles (`ADMIN` / `LIBRARIAN` /
-  `CLIENTE`): catálogo de lectura pública, operación de biblioteca solo para el
-  personal, gestión de usuarios exclusiva del ADMIN, y un portal donde cada socio
-  ve solo lo suyo (**autorización a nivel de fila**). La separación de roles es de
-  punta a punta: el frontend lee el rol del token y adapta el menú y las pantallas.
-  Contraseñas con BCrypt.
-- 📖 **Documentación OpenAPI / Swagger UI** autogenerada, con soporte de Bearer token.
-- 🛡️ **Manejo de errores** consistente con `ProblemDetail` (RFC 7807); `409` para
-  violaciones de reglas de negocio, `401/403` también en formato problem.
-- 📄 **Paginación** en los listados (`?page=&size=&sort=`).
-- 🗃️ **Migraciones de esquema versionadas** con Flyway.
-- ✅ **Tests** unitarios (Mockito), de capa web (MockMvc) y de integración del flujo
-  de seguridad, sobre H2.
-- 🐳 **Docker + Docker Compose** y 🚀 **CI en GitHub Actions** + blueprint para Render.
+- Navegación adaptada al rol contenido en el JWT.
+- Búsqueda con debounce en catálogo y socios.
+- Formularios con selectores para evitar depender de identificadores manuales.
+- Estados de carga mediante skeletons.
+- Estados vacíos y mensajes de error accionables.
+- Diálogos de confirmación para acciones sensibles.
+- Notificaciones tipo toast.
+- Fechas y estados presentados en un formato comprensible para el usuario.
+- Navegación y diálogos utilizables mediante teclado.
 
 ---
 
-## 🛠️ Stack
+## 🔐 Roles y permisos
 
-| Capa | Tecnología |
-|------|-----------|
-| Lenguaje | Java 17 |
-| Framework | Spring Boot 3.4 (Web, Data JPA, Validation, Actuator) |
-| Seguridad | Spring Security + JWT (jjwt), BCrypt |
-| Base de datos | PostgreSQL (H2 en tests) |
-| Migraciones | Flyway |
-| Documentación | springdoc-openapi (Swagger UI) |
-| Cliente HTTP | `java.net.http.HttpClient` |
-| Tests | JUnit 5, Mockito, Spring MockMvc |
-| Build | Maven |
-| Frontend | React 18 + Vite (SPA en `frontend/`) |
-| Infra | Docker, Docker Compose, GitHub Actions, Render |
+| Rol | Capacidades principales |
+|---|---|
+| `ADMIN` | Gestiona usuarios internos y dispone de todas las operaciones bibliotecarias. |
+| `LIBRARIAN` | Administra catálogo, ejemplares, socios, préstamos, reservas y multas. |
+| `CLIENTE` | Consulta el catálogo y gestiona únicamente sus préstamos, reservas y multas. |
+
+La autorización se aplica tanto en el backend como en el frontend. Los recursos personales utilizan controles a nivel de fila para evitar que un socio consulte o modifique información perteneciente a otro usuario.
 
 ---
 
-## 🚀 Cómo ejecutarlo
+## 📏 Reglas de negocio destacadas
 
-### Opción A — Docker Compose (recomendada)
+- Solo puede prestarse un ejemplar disponible.
+- El socio debe encontrarse activo.
+- Un socio no puede solicitar nuevos préstamos con vencimientos o multas impagas.
+- Se limita la cantidad de préstamos activos por socio.
+- Una reserva puede cumplirse asignando un ejemplar disponible del título solicitado.
+- Los préstamos pueden renovarse un número limitado de veces.
+- No se permite renovar un préstamo vencido o un título reservado por otra persona.
+- Las devoluciones fuera de término generan una multa.
+- Los emails, documentos, usernames y códigos de inventario se validan para evitar duplicados.
 
-Levanta la aplicación **y** la base de datos con un solo comando:
+---
+
+## 🏗️ Arquitectura
+
+```text
+┌────────────────────────────────────────────────────────────┐
+│                    Frontend React + Vite                    │
+│ catálogo · login · personal · portal del socio · feedback  │
+└───────────────────────────┬────────────────────────────────┘
+                            │ HTTP / JSON + JWT
+┌───────────────────────────▼────────────────────────────────┐
+│                API REST Spring Boot 3.4                    │
+│ controllers · services · repositories · reglas de negocio │
+│ Spring Security · ProblemDetail · OpenAPI · Actuator       │
+└───────────────────────────┬────────────────────────────────┘
+                            │ JPA / Flyway
+┌───────────────────────────▼────────────────────────────────┐
+│                         PostgreSQL                         │
+└────────────────────────────────────────────────────────────┘
+
+              Gutendex ──► importación de libros
+```
+
+### Backend
+
+- Java 17 y Spring Boot 3.4.
+- Spring Web, Data JPA, Validation y Actuator.
+- Spring Security con JWT y BCrypt.
+- PostgreSQL y migraciones versionadas con Flyway.
+- Errores HTTP normalizados mediante `ProblemDetail`.
+- Documentación OpenAPI y Swagger UI.
+- Tests con JUnit, Mockito, MockMvc, Spring Security Test y H2.
+
+### Frontend
+
+- React 18 y React Router.
+- Vite 6.
+- Context API para autenticación y notificaciones.
+- Rutas protegidas y menús por rol.
+- Vitest, Testing Library y jsdom.
+- Cliente HTTP centralizado para consumir la API.
+
+---
+
+## 📂 Estructura principal
+
+```text
+literalura/
+├── src/main/java/              # Backend Spring Boot
+├── src/main/resources/
+│   └── db/migration/           # Migraciones Flyway
+├── src/test/                   # Tests backend
+├── frontend/
+│   ├── src/
+│   │   ├── api/                # Clientes de la API
+│   │   ├── components/         # Componentes reutilizables
+│   │   ├── context/            # Autenticación y toasts
+│   │   ├── hooks/              # Estado paginado y utilidades
+│   │   └── pages/              # Pantallas por módulo y rol
+│   └── package.json
+├── docs/DEPLOY.md
+├── docker-compose.yml
+├── Dockerfile
+├── render.yaml
+└── pom.xml
+```
+
+---
+
+## 🚀 Ejecución local
+
+### Requisitos
+
+- Java 17.
+- Node.js 20 o superior.
+- Docker y Docker Compose, o una instancia de PostgreSQL.
+
+### 1. Backend y PostgreSQL con Docker
 
 ```bash
+git clone https://github.com/LeandroMelchiori/literalura.git
+cd literalura
 docker compose up --build
 ```
 
-La API queda disponible en `http://localhost:8080`.
+La API estará disponible en:
 
-### Opción B — Local con Maven
+- API: `http://localhost:8080`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- Health check: `http://localhost:8080/actuator/health`
 
-Requiere una instancia de PostgreSQL. Configurá las variables de entorno (o usá los
-valores por defecto `localhost:5432/literalura`, usuario/clave `postgres`):
+### 2. Frontend
 
-```bash
-export DB_HOST=localhost DB_PORT=5432 DB_NAME=literalura DB_USER=postgres DB_PASSWORD=postgres
-./mvnw spring-boot:run
-```
-
----
-
-## 📡 Endpoints
-
-Base URL: `/api`
-
-**Autenticación** 🔓 = público &nbsp; 🔒 = requiere JWT &nbsp; 👑 = solo ADMIN
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| 🔓 `POST` | `/api/auth/login` | Login del personal; devuelve el JWT |
-| 👑 `GET`  | `/api/auth/users` | Lista los usuarios del personal |
-| 👑 `POST` | `/api/auth/users` | Crea un usuario del personal (`ADMIN`/`LIBRARIAN`) |
-
-**Catálogo** (lectura pública; catalogar requiere JWT)
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| 🔒 `POST` | `/api/books/search?title={título}` | Busca en Gutendex y cataloga el título |
-| `GET`  | `/api/books` | Lista paginada de títulos |
-| `GET`  | `/api/books/language/{idioma}` | Títulos por idioma (`en`, `es`, ...), paginado |
-| `GET`  | `/api/books/stats` | Estadísticas agregadas de descargas |
-| `GET`  | `/api/authors` | Lista paginada de autores |
-| `GET`  | `/api/authors/alive?year={año}` | Autores vivos hasta ese año |
-
-**Biblioteca** (solo personal — 🔒 requiere rol `LIBRARIAN`/`ADMIN`)
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `POST` | `/api/copies` | Registra un ejemplar físico de un título |
-| `GET`  | `/api/copies?status={estado}` | Lista ejemplares, filtrable por estado |
-| `POST` | `/api/members` | Da de alta un socio + su acceso (`{...,username,password}`) |
-| `GET`  | `/api/members` | Lista paginada de socios |
-| `PATCH`| `/api/members/{id}/status?status={estado}` | Activa o suspende un socio |
-| `POST` | `/api/loans` | Registra un préstamo (`{copyId, memberId}`) |
-| `POST` | `/api/loans/{id}/return` | Registra la devolución |
-| `GET`  | `/api/loans?status=&memberId=` | Lista préstamos (por estado o socio) |
-| `GET`  | `/api/loans/overdue` | Lista préstamos vencidos |
-| `GET`  | `/api/reservations` | Lista reservas pendientes |
-| `POST` | `/api/reservations/{id}/fulfill?copyId=` | Cumple una reserva prestando un ejemplar |
-| `GET`  | `/api/fines` | Lista las multas impagas |
-| `POST` | `/api/fines/{id}/pay` | Registra el pago de una multa |
-
-**Portal del cliente** (🔒 requiere rol `CLIENTE`)
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `GET`  | `/api/loans/mine` | Préstamos del socio autenticado |
-| `POST` | `/api/loans/{id}/renew` | Renueva un préstamo propio |
-| `POST` | `/api/reservations` | Reserva un título (`{bookId}`) |
-| `GET`  | `/api/reservations/mine` | Reservas del socio autenticado |
-| `POST` | `/api/reservations/{id}/cancel` | Cancela una reserva propia |
-| `GET`  | `/api/fines/mine` | Multas del socio autenticado |
-
-Health check público: `GET /actuator/health`.
-
-### Documentación interactiva
-
-- **Swagger UI:** `http://localhost:8080/swagger-ui.html`
-- **OpenAPI JSON:** `http://localhost:8080/v3/api-docs`
-
-### Ejemplo: flujo completo
-
-```bash
-# 1. Login (al primer arranque se crea el ADMIN inicial: admin / admin12345)
-TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin12345"}' | jq -r .token)
-
-# 2. Catalogar un título desde Gutendex
-curl -X POST "http://localhost:8080/api/books/search?title=pride%20and%20prejudice" \
-  -H "Authorization: Bearer $TOKEN"
-
-# 3. Registrar un ejemplar físico, un socio y un préstamo
-curl -X POST http://localhost:8080/api/copies -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" -d '{"bookId":1,"inventoryCode":"A-001"}'
-curl -X POST http://localhost:8080/api/members -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Ana Díaz","email":"ana@mail.com","documentId":"12345678"}'
-curl -X POST http://localhost:8080/api/loans -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" -d '{"copyId":1,"memberId":1}'
-```
-
-> ⚠️ En producción definir `JWT_SECRET`, `ADMIN_USERNAME` y `ADMIN_PASSWORD`
-> mediante variables de entorno; los valores por defecto son solo para desarrollo.
-
----
-
-## 💻 Frontend (React)
-
-SPA en [`frontend/`](frontend/) que consume esta API: catálogo público, login del
-personal y operación de la biblioteca (ejemplares, socios, préstamos) con manejo
-visible de estados de carga, error y reglas de negocio.
+En otra terminal:
 
 ```bash
 cd frontend
 npm install
-npm run dev        # http://localhost:5173 (proxya /api al backend local)
+npm run dev
 ```
 
-En producción el frontend se despliega aparte (p. ej. Vercel) definiendo
-`VITE_API_URL` con el dominio de la API, cuyo CORS se configura con
-`CORS_ALLOWED_ORIGINS`.
+El frontend se ejecuta en `http://localhost:5173` y, en desarrollo, redirige las solicitudes `/api` al backend local.
 
-La guía completa de despliegue (Render + Vercel) está en
-[`docs/DEPLOY.md`](docs/DEPLOY.md).
+### Backend sin Docker
+
+```bash
+export DB_URL=jdbc:postgresql://localhost:5432/literalura
+export DB_USER=postgres
+export DB_PASSWORD=postgres
+export JWT_SECRET=una-clave-segura-de-al-menos-32-caracteres
+./mvnw spring-boot:run
+```
+
+> Los usuarios iniciales y sus contraseñas deben configurarse mediante variables de entorno. No se deben reutilizar las credenciales de desarrollo en un entorno publicado.
 
 ---
 
-## ✅ Tests
+## ⚙️ Variables de entorno principales
+
+| Variable | Descripción |
+|---|---|
+| `DB_URL` | URL JDBC de PostgreSQL. |
+| `DB_USER` | Usuario de la base de datos. |
+| `DB_PASSWORD` | Contraseña de la base de datos. |
+| `JWT_SECRET` | Clave utilizada para firmar los tokens. |
+| `ADMIN_USERNAME` | Username del administrador inicial. |
+| `ADMIN_PASSWORD` | Contraseña del administrador inicial. |
+| `DEMO_ENABLED` | Activa o desactiva el usuario bibliotecario de demostración. |
+| `CORS_ALLOWED_ORIGINS` | Orígenes permitidos para el frontend. |
+| `VITE_API_URL` | URL de la API consumida por el frontend desplegado. |
+
+---
+
+## 📡 API y documentación
+
+La API utiliza el prefijo `/api` y está organizada en los siguientes grupos:
+
+- `/api/auth`: autenticación y usuarios internos.
+- `/api/books` y `/api/authors`: catálogo e importación desde Gutendex.
+- `/api/copies`: ejemplares físicos.
+- `/api/members`: socios.
+- `/api/loans`: préstamos y renovaciones.
+- `/api/reservations`: reservas.
+- `/api/fines`: multas.
+
+La especificación completa puede consultarse desde Swagger UI cuando el backend está en ejecución.
+
+---
+
+## ✅ Calidad y pruebas
+
+### Backend
 
 ```bash
 ./mvnw verify
 ```
 
-Los tests usan una base de datos H2 en memoria, por lo que no requieren PostgreSQL.
+La suite cubre servicios, controladores, reglas de negocio, seguridad, permisos y flujos de integración. Los tests utilizan H2 en memoria y no requieren PostgreSQL.
+
+### Frontend
+
+```bash
+cd frontend
+npm test
+npm run build
+```
+
+El frontend incluye pruebas con Vitest y Testing Library para autenticación, componentes y flujos principales.
+
+GitHub Actions valida el proyecto en cada push y pull request.
 
 ---
 
 ## ☁️ Despliegue
 
-El repositorio incluye [`render.yaml`](render.yaml), un blueprint de
-[Render](https://render.com) que aprovisiona una base de datos PostgreSQL y despliega
-la API desde el `Dockerfile`. También puede desplegarse en cualquier plataforma que
-soporte contenedores (Railway, Fly.io, etc.) usando las variables de entorno
-`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` y `PORT`.
+El repositorio está preparado para separar las dos capas:
+
+- Backend y PostgreSQL en Render mediante `Dockerfile` y `render.yaml`.
+- Frontend en Vercel utilizando `frontend/` como directorio raíz.
+- Configuración CORS mediante `CORS_ALLOWED_ORIGINS`.
+- Conexión del frontend mediante `VITE_API_URL`.
+
+La guía paso a paso está disponible en [`docs/DEPLOY.md`](docs/DEPLOY.md).
+
+Actualmente el repositorio no publica URLs de demostración permanentes en este README; esto evita mostrar enlaces incompletos o entornos temporales como si fueran producción.
 
 ---
 
-## 📂 Estructura
+## 🛣️ Próximas mejoras
 
-```
-src/main/java/com/alura/literalura
-├── config/       # Beans (HttpClient, OpenAPI)
-├── controller/   # Controladores REST
-├── dto/          # Objetos de transferencia
-├── exception/    # Excepciones y handler global
-├── model/        # Entidades JPA
-├── repository/   # Repositorios Spring Data
-└── service/      # Lógica de negocio
-```
+- Publicar una demostración estable con cuentas separadas por rol.
+- Agregar capturas o un video corto de los principales flujos.
+- Incorporar tests end-to-end del frontend contra un backend de prueba.
+- Añadir auditoría de operaciones sensibles.
+- Mejorar observabilidad y métricas de uso de la biblioteca.
 
 ---
 
-## 📜 Licencia
+## Autor
 
-Distribuido bajo licencia MIT. Ver [LICENSE](LICENSE).
+Desarrollado por **Leandro Melchiori**.
+
+- [GitHub](https://github.com/LeandroMelchiori)
+- [LinkedIn](https://www.linkedin.com/in/leandromelchiori-developer/)
+
+## Licencia
+
+Distribuido bajo licencia MIT. Consultá [`LICENSE`](LICENSE) para más información.
